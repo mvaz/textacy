@@ -118,11 +118,11 @@
                 <span class="c1"># vexing for user data. As a best guess, we *know* that within</span>
                 <span class="c1"># keys, we must have tuples. In values we just have to hope</span>
                 <span class="c1"># users don&#39;t mind getting a list instead of a tuple.</span>
-                <span class="k">if</span> <span class="s2">&quot;user_data_keys&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+                <span class="k">if</span> <span class="sa">b</span><span class="s2">&quot;user_data_keys&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
                     <span class="n">user_data_keys</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
-                        <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;user_data_keys&quot;</span><span class="p">],</span> <span class="n">use_list</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;user_data_keys&quot;</span><span class="p">],</span> <span class="n">use_list</span><span class="o">=</span><span class="kc">False</span>
                     <span class="p">)</span>
-                    <span class="n">user_data_values</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;user_data_values&quot;</span><span class="p">])</span>
+                    <span class="n">user_data_values</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;user_data_values&quot;</span><span class="p">])</span>
                     <span class="n">user_data</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
                         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">zip_</span><span class="p">(</span><span class="n">user_data_keys</span><span class="p">,</span> <span class="n">user_data_values</span><span class="p">)</span>
@@ -130,26 +130,29 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">user_data</span> <span class="o">=</span> <span class="kc">None</span>
 
-                <span class="n">text</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
-                <span class="n">attrs</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;array_body&quot;</span><span class="p">]</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+                <span class="n">attrs</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;array_body&quot;</span><span class="p">]</span>
                 <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">spaces</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                     <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
                     <span class="n">has_space</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                    <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">start</span><span class="p">:</span> <span class="n">end</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">continue</span>  <span class="c1"># FIXME</span>
                     <span class="n">spaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">has_space</span><span class="p">))</span>
                     <span class="n">start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="n">has_space</span>
 
                 <span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">SpacyDoc</span><span class="p">(</span>
                     <span class="n">vocab</span><span class="p">,</span> <span class="n">words</span><span class="o">=</span><span class="n">words</span><span class="p">,</span> <span class="n">spaces</span><span class="o">=</span><span class="n">spaces</span><span class="p">,</span> <span class="n">user_data</span><span class="o">=</span><span class="n">user_data</span>
                 <span class="p">)</span>
-                <span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">spacy_doc</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;array_head&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">:],</span> <span class="n">attrs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:])</span>
-                <span class="k">if</span> <span class="s2">&quot;sentiment&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
-                    <span class="n">spacy_doc</span><span class="o">.</span><span class="n">sentiment</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;sentiment&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="s2">&quot;tensor&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
-                    <span class="n">spacy_doc</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;tensor&quot;</span><span class="p">]</span>
+                <span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">spacy_doc</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;array_head&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">:],</span> <span class="n">attrs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:])</span>
+                <span class="k">if</span> <span class="sa">b</span><span class="s2">&quot;sentiment&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="n">spacy_doc</span><span class="o">.</span><span class="n">sentiment</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;sentiment&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="sa">b</span><span class="s2">&quot;tensor&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="n">spacy_doc</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;tensor&quot;</span><span class="p">]</span>
                 <span class="k">yield</span> <span class="n">spacy_doc</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
