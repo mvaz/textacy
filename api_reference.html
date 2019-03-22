@@ -589,7 +589,7 @@ disk; and more.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">records</span> <span class="o">=</span> <span class="n">cw</span><span class="o">.</span><span class="n">docs</span><span class="p">(</span><span class="n">congress</span><span class="o">=</span><span class="mi">114</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadata_stream</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">split_records</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">records</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">add_texts</span><span class="p">(</span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="n">metadata_stream</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">add_texts</span><span class="p">(</span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="n">metadata_stream</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span>
 <span class="go">Corpus(75 docs; 55869 tokens)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="k">lambda</span> <span class="n">doc</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;speaker_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Rick Santorum&#39;</span><span class="p">)</span>
@@ -810,7 +810,7 @@ then add it to the corpus.</p>
 
 <dl class="method">
 <dt id="textacy.corpus.Corpus.add_texts">
-<code class="descname">add_texts</code><span class="sig-paren">(</span><em>texts</em>, <em>metadatas=None</em>, <em>n_threads=1</em>, <em>batch_size=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/corpus.html#Corpus.add_texts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.corpus.Corpus.add_texts" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_texts</code><span class="sig-paren">(</span><em>texts</em>, <em>metadatas=None</em>, <em>n_threads=None</em>, <em>batch_size=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/corpus.html#Corpus.add_texts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.corpus.Corpus.add_texts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process a stream of texts (and a corresponding stream of metadata dicts,
 optionally) in parallel with spaCy; add as <a class="reference internal" href="#textacy.doc.Doc" title="textacy.doc.Doc"><code class="xref py py-class docutils literal notranslate"><span class="pre">Doc</span></code></a> s
 to the corpus.</p>
@@ -831,8 +831,8 @@ the first item in <code class="docutils literal notranslate"><span class="pre">m
 the first item in <code class="docutils literal notranslate"><span class="pre">texts</span></code>, and so on from there.</p>
 </div>
 </li>
-<li><strong>n_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of threads to use when processing <code class="docutils literal notranslate"><span class="pre">texts</span></code>
-in parallel, if available.</li>
+<li><strong>n_threads</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of threads to use when processing <code class="docutils literal notranslate"><span class="pre">texts</span></code></li>
+<li><strong>parallel</strong><strong>, </strong><strong>if available. DEPRECATED! This never worked correctly</strong> (<em>in</em>) – in spacy v2.0, and no longer does in anything in spacy v2.1.</li>
 <li><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of texts to process at a time.</li>
 </ul>
 </td>
