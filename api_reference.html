@@ -5226,7 +5226,7 @@ provided when <code class="docutils literal notranslate"><span class="pre">forma
 
 <dl class="function">
 <dt id="textacy.io.spacy.write_spacy_docs">
-<code class="descclassname">textacy.io.spacy.</code><code class="descname">write_spacy_docs</code><span class="sig-paren">(</span><em>data</em>, <em>fname</em>, <em>make_dirs=False</em>, <em>format='pickle'</em>, <em>include_tensor=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/io/spacy.html#write_spacy_docs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.io.spacy.write_spacy_docs" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">textacy.io.spacy.</code><code class="descname">write_spacy_docs</code><span class="sig-paren">(</span><em>data</em>, <em>fname</em>, <em>make_dirs=False</em>, <em>format='pickle'</em>, <em>exclude=('tensor'</em>, <em>)</em>, <em>include_tensor=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/textacy/io/spacy.html#write_spacy_docs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.io.spacy.write_spacy_docs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write one or more <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code> s to disk at <code class="docutils literal notranslate"><span class="pre">fname</span></code> in either pickle or
 binary format.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -5258,7 +5258,12 @@ read from the same file. If spaCy changes, this code could break,
 so use this functionality at your own risk!</p>
 </div>
 </li>
-<li><strong>include_tensor</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If False, <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code> tensors are not written
+<li><strong>exclude</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – String names of serialization fields to exclude;
+see <a class="reference external" href="https://spacy.io/api/doc#serialization-fields">https://spacy.io/api/doc#serialization-fields</a> for options.
+By default, excludes tensors in order to reproduce existing behavior
+of <code class="docutils literal notranslate"><span class="pre">include_tensor=False</span></code>.</li>
+<li><strong>include_tensor</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – DEPRECATED! Use <code class="docutils literal notranslate"><span class="pre">exclude</span></code> instead.
+If False, <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code> tensors are not written
 to disk; otherwise, they are. Note that this is only applicable when
 <code class="docutils literal notranslate"><span class="pre">format=&quot;binary&quot;</span></code>. Also note that including tensors <em>significantly</em>
 increases the file size of serialized docs.</li>
