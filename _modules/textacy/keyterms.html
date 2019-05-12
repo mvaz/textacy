@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.keyterms &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -73,7 +71,7 @@
 <span class="sd">    Extract key terms from a document using the [SGRank]_ algorithm.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        ngrams (int or Set[int]): n of which n-grams to include; ``(1, 2, 3, 4, 5, 6)``</span>
 <span class="sd">                (default) includes all ngrams from 1 to 6; `2`</span>
 <span class="sd">                if only bigrams are wanted</span>
@@ -246,7 +244,7 @@
 <span class="sd">    with the parameter values used in the [TextRank]_ algorithm.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
@@ -279,7 +277,7 @@
 <span class="sd">    with the parameter values used in the [SingleRank]_ algorithm.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
@@ -323,7 +321,7 @@
 <span class="sd">    terms, connected by edges and weights specified by parameters.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        doc (``textacy.Doc`` or ``spacy.Doc``)</span>
+<span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
 <span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
@@ -819,7 +817,7 @@
     <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1"># greedily select to maximize exprel metric</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">contrib</span><span class="p">:</span>  <span class="c1"># TODO: check that .items(): not needed</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">contrib</span><span class="p">:</span>
             <span class="k">break</span>
         <span class="c1"># find word with highest l-step expanded relevance score</span>
         <span class="n">max_word_score</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
@@ -983,8 +981,6 @@
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -997,7 +993,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

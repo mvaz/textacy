@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>textacy.lang_utils &#8212; textacy 0.6.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for textacy.lang_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Language Detection</span>
+<span class="sd">------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># TODO: identify the &quot;best&quot; language detector available for OSS python</span>
+<span class="c1"># in terms of prediction accuracy/precision/recall, speed, and installation</span>
+<span class="c1"># current candidates:</span>
+<span class="c1"># - cld2-cffi https://github.com/GregBowyer/cld2-cffi</span>
+<span class="c1"># - pycld2 https://github.com/aboSamoor/pycld2</span>
+<span class="c1"># - cld3 https://github.com/google/cld3 or https://github.com/Elizafox/cld3</span>
+<span class="c1"># - langdetect https://github.com/Mimino666/langdetect</span>
+<span class="c1"># - whatthelang https://github.com/indix/whatthelang</span>
+<span class="c1"># - langid https://github.com/saffsd/langid.py</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">cld2</span> <span class="k">import</span> <span class="n">detect</span> <span class="k">as</span> <span class="n">cld2_detect</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="detect_lang"><a class="viewcode-back" href="../../api_reference.html#textacy.lang_utils.detect_lang">[docs]</a><span class="k">def</span> <span class="nf">detect_lang</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Predict the most likely language of a text and return its 2-letter code</span>
+<span class="sd">    (see https://cloud.google.com/translate/v2/using_rest#language-params).</span>
+<span class="sd">    Uses the `cld2-cffi &lt;https://pypi.python.org/pypi/cld2-cffi&gt;`_ package;</span>
+<span class="sd">    to take advantage of optional params, call :func:`cld2.detect()` directly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cld2_detect</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;`cld2-cffi` must be installed to use textacy&#39;s automatic language detection; &quot;</span>
+            <span class="s2">&quot;you may do so via `pip install cld2-cffi` or `pip install textacy[lang]`.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">compat</span><span class="o">.</span><span class="n">PY2</span><span class="p">:</span>
+        <span class="n">is_reliable</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">best_guesses</span> <span class="o">=</span> <span class="n">cld2_detect</span><span class="p">(</span>
+            <span class="n">compat</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">bestEffort</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">is_reliable</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">best_guesses</span> <span class="o">=</span> <span class="n">cld2_detect</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">bestEffort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_reliable</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Text language detected with low confidence; best guesses: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">best_guesses</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">best_guesses</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">textacy</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=chartbeat-labs&repo=textacy&type=watch&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019 Chartbeat, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

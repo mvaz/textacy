@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.io.csv &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -41,22 +39,22 @@
 <span class="sd">CSVs may be delimited not only by commas (the default) but tabs, pipes, and</span>
 <span class="sd">other valid one-char delimiters.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">open_sesame</span>
 
 
-<div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.csv.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s2">&quot;excel&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.csv.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s2">&quot;excel&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Read the contents of a CSV file at ``fname``, streaming line-by-line,</span>
+<span class="sd">    Read the contents of a CSV file at ``filepath``, streaming line-by-line,</span>
 <span class="sd">    where each line is a list of strings and/or floats whose values</span>
 <span class="sd">    are separated by ``delimiter``.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fname (str): Path to file on disk from which data will be read.</span>
+<span class="sd">        filepath (str): Path to file on disk from which data will be read.</span>
 <span class="sd">        encoding (str): Name of the encoding used to decode or encode the data</span>
-<span class="sd">            in ``fname``.</span>
+<span class="sd">            in ``filepath``.</span>
 <span class="sd">        fieldnames (List[str] or &#39;infer&#39;): If specified, gives names for columns</span>
 <span class="sd">            of values, which are used as keys in an ordered dictionary representation</span>
 <span class="sd">            of each line&#39;s data. If &#39;infer&#39;, the first kB of data is analyzed</span>
@@ -83,7 +81,7 @@
 <span class="sd">        https://docs.python.org/3/library/csv.html#csv.reader</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">has_header</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">dialect</span> <span class="o">==</span> <span class="s2">&quot;infer&quot;</span> <span class="ow">or</span> <span class="n">fieldnames</span> <span class="o">==</span> <span class="s2">&quot;infer&quot;</span><span class="p">:</span>
             <span class="n">sniffer</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span>
             <span class="c1"># add pipes to the list of preferred delimiters, and put spaces last</span>
@@ -128,7 +126,7 @@
 
 <div class="viewcode-block" id="write_csv"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.csv.write_csv">[docs]</a><span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
-    <span class="n">fname</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">,</span>
     <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">fieldnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -136,7 +134,7 @@
     <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Write rows of ``data`` to disk at ``fname``, where each row is an iterable</span>
+<span class="sd">    Write rows of ``data`` to disk at ``filepath``, where each row is an iterable</span>
 <span class="sd">    or a dictionary of strings and/or numbers, written to one line with values</span>
 <span class="sd">    separated by ``delimiter``.</span>
 
@@ -156,14 +154,14 @@
 <span class="sd">                 {&#39;text&#39;: &#39;The movie was okay, I guess.&#39;, &#39;score&#39;: 0.2},</span>
 <span class="sd">                 {&#39;text&#39;: &#39;Worst. Movie. Ever.&#39;, &#39;score&#39;: -1.0}]</span>
 
-<span class="sd">        fname (str): Path to file on disk to which data will be written.</span>
+<span class="sd">        filepath (str): Path to file on disk to which data will be written.</span>
 <span class="sd">        encoding (str): Name of the encoding used to decode or encode the data</span>
-<span class="sd">            in ``fname``.</span>
+<span class="sd">            in ``filepath``.</span>
 <span class="sd">        make_dirs (bool): If True, automatically create (sub)directories if</span>
-<span class="sd">            not already present in order to write ``fname``.</span>
+<span class="sd">            not already present in order to write ``filepath``.</span>
 <span class="sd">        fieldnames (List[str]): Sequence of keys that identify the order in which</span>
-<span class="sd">            values in each rows&#39; dictionary is written to ``fname``. These are</span>
-<span class="sd">            included in ``fname`` as a header row of column names.</span>
+<span class="sd">            values in each rows&#39; dictionary is written to ``filepath``. These are</span>
+<span class="sd">            included in ``filepath`` as a header row of column names.</span>
 
 <span class="sd">            .. note:: Only specify this if ``data`` is an iterable of dictionaries.</span>
 
@@ -175,7 +173,7 @@
 <span class="sd">        https://docs.python.org/3/library/csv.html#csv.writer</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">open_sesame</span><span class="p">(</span>
-        <span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wt&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="n">make_dirs</span>
+        <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wt&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="n">make_dirs</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">fieldnames</span><span class="p">:</span>
             <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span>
@@ -249,8 +247,6 @@
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -263,7 +259,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

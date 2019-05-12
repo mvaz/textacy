@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.vsm.vectorizers &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -73,17 +71,16 @@
 
 <span class="sd">    Stream a corpus with metadata from disk::</span>
 
-<span class="sd">        &gt;&gt;&gt; cw = textacy.datasets.CapitolWords()</span>
-<span class="sd">        &gt;&gt;&gt; text_stream, metadata_stream = textacy.io.split_records(</span>
-<span class="sd">        ...     cw.records(limit=1000), &#39;text&#39;, itemwise=False)</span>
-<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus(&#39;en&#39;, texts=text_stream, metadatas=metadata_stream)</span>
+<span class="sd">        &gt;&gt;&gt; ds = textacy.datasets.CapitolWords()</span>
+<span class="sd">        &gt;&gt;&gt; records = ds.records(limit=1000)</span>
+<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus(&quot;en&quot;, data=records)</span>
 <span class="sd">        &gt;&gt;&gt; corpus</span>
 <span class="sd">        Corpus(1000 docs; 538172 tokens)</span>
 
 <span class="sd">    Tokenize and vectorize the first 600 documents of this corpus::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs = (</span>
-<span class="sd">        ...     doc.to_terms_list(ngrams=1, named_entities=True, as_strings=True)</span>
+<span class="sd">        ...     doc.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = Vectorizer(</span>
 <span class="sd">        ...     apply_idf=True, norm=&#39;l2&#39;,</span>
@@ -97,7 +94,7 @@
 <span class="sd">    the groups, terms, and weights learned in the previous step::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs = (</span>
-<span class="sd">        ...     doc.to_terms_list(ngrams=1, named_entities=True, as_strings=True)</span>
+<span class="sd">        ...     doc.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
 <span class="sd">        ...     for doc in corpus[600:])</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = vectorizer.transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix</span>
@@ -116,7 +113,7 @@
 <span class="sd">    to a particular set of values::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs = (</span>
-<span class="sd">        ...     doc.to_terms_list(ngrams=1, named_entities=True, as_strings=True)</span>
+<span class="sd">        ...     doc.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = Vectorizer(</span>
 <span class="sd">        ...     apply_idf=True, idf_type=&#39;smooth&#39;, norm=&#39;l2&#39;,</span>
@@ -417,7 +414,7 @@
 
 <span class="sd">                    &gt;&gt;&gt; ([tok.lemma_ for tok in spacy_doc]</span>
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
-<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.named_entities(doc))</span>
+<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
 <span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
@@ -442,7 +439,7 @@
 
 <span class="sd">                    &gt;&gt;&gt; ([tok.lemma_ for tok in spacy_doc]</span>
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
-<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.named_entities(doc))</span>
+<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
 <span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
@@ -469,7 +466,7 @@
 
 <span class="sd">                    &gt;&gt;&gt; ([tok.lemma_ for tok in spacy_doc]</span>
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
-<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.named_entities(doc))</span>
+<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
 <span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
@@ -775,7 +772,7 @@
 <span class="sd">    are grouped not by documents but by a categorical value in the docs&#39; metadata::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs, groups = textacy.io.unzip(</span>
-<span class="sd">        ...     (doc.to_terms_list(ngrams=1, named_entities=True, as_strings=True),</span>
+<span class="sd">        ...     (doc.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
 <span class="sd">        ...      doc.metadata[&#39;speaker_name&#39;])</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = GroupVectorizer(</span>
@@ -790,7 +787,7 @@
 <span class="sd">    the groups, terms, and weights learned in the previous step::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs, groups = textacy.io.unzip(</span>
-<span class="sd">        ...     (doc.to_terms_list(ngrams=1, named_entities=True, as_strings=True),</span>
+<span class="sd">        ...     (doc.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
 <span class="sd">        ...      doc.metadata[&#39;speaker_name&#39;])</span>
 <span class="sd">        ...     for doc in corpus[600:])</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix = vectorizer.transform(tokenized_docs, groups)</span>
@@ -810,7 +807,7 @@
 <span class="sd">    to a particular set of values::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs, groups = textacy.io.unzip(</span>
-<span class="sd">        ...     (doc.to_terms_list(ngrams=1, named_entities=True, as_strings=True),</span>
+<span class="sd">        ...     (doc.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
 <span class="sd">        ...      doc.metadata[&#39;speaker_name&#39;])</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = GroupVectorizer(</span>
@@ -986,7 +983,7 @@
 
 <span class="sd">                    &gt;&gt;&gt; ([tok.lemma_ for tok in spacy_doc]</span>
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
-<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.named_entities(doc))</span>
+<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
 <span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
@@ -1016,7 +1013,7 @@
 
 <span class="sd">                    &gt;&gt;&gt; ([tok.lemma_ for tok in spacy_doc]</span>
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
-<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.named_entities(doc))</span>
+<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
 <span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
@@ -1048,7 +1045,7 @@
 
 <span class="sd">                    &gt;&gt;&gt; ([tok.lemma_ for tok in spacy_doc]</span>
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
-<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.named_entities(doc))</span>
+<span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
 <span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
@@ -1261,8 +1258,6 @@
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -1275,7 +1270,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

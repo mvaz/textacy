@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Quickstart &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -45,16 +43,16 @@ this top-level import, but we’ll see that some features require their own impo
 <h2>Working with Text<a class="headerlink" href="#working-with-text" title="Permalink to this headline">¶</a></h2>
 <p>Let’s start with a single text document:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;Since the so-called &quot;statistical revolution&quot; in the late 1980s and mid 1990s, &#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39;much Natural Language Processing research has relied heavily on machine learning. &#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39;Formerly, many language-processing tasks typically involved the direct hand coding &#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39;of rules, which is not in general robust to natural language variation. &#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39;The machine-learning paradigm calls instead for using statistical inference &#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39;to automatically learn such rules through the analysis of large corpora &#39;</span>
-<span class="gp">... </span>    <span class="s1">&#39;of typical real-world examples.&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="s2">&quot;Since the so-called </span><span class="se">\&quot;</span><span class="s2">statistical revolution</span><span class="se">\&quot;</span><span class="s2"> in the late 1980s and mid 1990s, &quot;</span>
+<span class="gp">... </span>    <span class="s2">&quot;much Natural Language Processing research has relied heavily on machine learning. &quot;</span>
+<span class="gp">... </span>    <span class="s2">&quot;Formerly, many language-processing tasks typically involved the direct hand coding &quot;</span>
+<span class="gp">... </span>    <span class="s2">&quot;of rules, which is not in general robust to natural language variation. &quot;</span>
+<span class="gp">... </span>    <span class="s2">&quot;The machine-learning paradigm calls instead for using statistical inference &quot;</span>
+<span class="gp">... </span>    <span class="s2">&quot;to automatically learn such rules through the analysis of large corpora &quot;</span>
+<span class="gp">... </span>    <span class="s2">&quot;of typical real-world examples.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Note:</strong> In almost all cases, <code class="docutils literal notranslate"><span class="pre">textacy</span></code> (as well as <code class="docutils literal notranslate"><span class="pre">spacy</span></code>) expects to be
+<p><strong>Note:</strong> In almost all cases, textacy (as well as spaCy) expects to be
 working with unicode text data. Throughout the code, this is indicated as <code class="docutils literal notranslate"><span class="pre">str</span></code>
 to be consistent with Python 3’s default string type; users of Python 2, however,
 must be mindful to use <code class="docutils literal notranslate"><span class="pre">unicode</span></code>, and convert from the default (bytes) string
@@ -62,7 +60,7 @@ type as needed.</p>
 <p>Before (or <em>in lieu of</em>) processing this text with spaCy, we can do a few things.
 First, let’s look for keywords-in-context, as a quick way to assess, by eye,
 how a particular word or phrase is used in a body of text:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">text_utils</span><span class="o">.</span><span class="n">KWIC</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">text_utils</span><span class="o">.</span><span class="n">KWIC</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;language&quot;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
 <span class="go"> 1980s and mid 1990s, much Natural  Language  Processing research has relied hea</span>
 <span class="go">n machine learning. Formerly, many  language -processing tasks typically involve</span>
 <span class="go">s not in general robust to natural  language  variation. The machine-learning pa</span>
@@ -84,41 +82,47 @@ For example:</p>
 tokenized, part-of-speech tagged, parsed, and so on. Since spaCy’s pipelines
 are language-dependent, we have to load a particular pipeline to match the text;
 when working with texts from multiple languages, this can be a pain. Fortunately,
-<code class="docutils literal notranslate"><span class="pre">textacy</span></code> includes automatic language detection to apply the right pipeline
+textacy includes automatic language detection to apply the right pipeline
 to the text, and it caches the loaded language data to minimize wait time and
 hassle. Making a <code class="docutils literal notranslate"><span class="pre">Doc</span></code> from text is easy:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">Doc(85 tokens; &quot;Since the so-called &quot;statistical revolution&quot; in...&quot;)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">make_spacy_doc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">preview</span>
+<span class="go">&#39;Doc(85 tokens: &quot;Since the so-called &quot;statistical revolution&quot; in...&quot;)&#39;</span>
 </pre></div>
 </div>
 <p>Under the hood, the text has been identified as English, and the default English-
 language (<code class="docutils literal notranslate"><span class="pre">&quot;en&quot;</span></code>) pipeline has been loaded, cached, and applied to it. If you
 need to customize the pipeline, you can still easily load and cache it, then
 specify it yourself when initializing the doc:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">en</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="s1">&#39;en_core_web_sm&#39;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parser&#39;</span><span class="p">,))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">en</span><span class="p">)</span>
-<span class="go">Doc(85 tokens; &quot;Since the so-called &quot;statistical revolution&quot; in...&quot;)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">en</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">load_spacy_lang</span><span class="p">(</span><span class="s2">&quot;en_core_web_sm&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;parser&quot;</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">make_spacy_doc</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">en</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">preview</span>
+<span class="go">&#39;Doc(85 tokens: &quot;Since the so-called &quot;statistical revolution&quot; in...&quot;)&#39;</span>
 </pre></div>
 </div>
 <p>Oftentimes, text data comes paired with metadata, such as a title, author, or
-publication date. <code class="docutils literal notranslate"><span class="pre">textacy</span></code> makes it easy to keep these together:</p>
+publication date, and we’d like to keep them together. textacy makes this easy:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Natural-language processing&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/Natural-language_processing&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="s1">&#39;wikipedia&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Natural-language processing&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://en.wikipedia.org/wiki/Natural-language_processing&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;wikipedia&quot;</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">make_spacy_doc</span><span class="p">((</span><span class="n">text</span><span class="p">,</span> <span class="n">metadata</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span>
 <span class="go">&#39;Natural-language processing&#39;</span>
 </pre></div>
 </div>
-<p>For some use cases, a <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> can be treated like a convenient wrapper
-around an underlying <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code>; if you need them, the key spaCy objects
-associated with the text are readily accessible as attributes: <code class="docutils literal notranslate"><span class="pre">Doc.spacy_doc</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Doc.spacy_vocab</span></code>, and <code class="docutils literal notranslate"><span class="pre">Doc.spacy_stringstore</span></code>. When possible, functions accept
-either a <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> or a <code class="docutils literal notranslate"><span class="pre">spacy.Doc</span></code> as input. Check the docstrings
-if you’re not sure!</p>
+<p>textacy adds a variety of useful functionality to vanilla spaCy docs,
+accessible via its <code class="docutils literal notranslate"><span class="pre">._</span></code> “underscore” property. For example: <code class="docutils literal notranslate"><span class="pre">doc._.preview</span></code>
+gives a convenient preview of the doc’s contents, and <code class="docutils literal notranslate"><span class="pre">doc._.meta</span></code> returns
+any metadata associated with the main text content.
+See <a class="reference external" href="https://spacy.io/usage/processing-pipelines#custom-components-attributes">https://spacy.io/usage/processing-pipelines#custom-components-attributes</a>
+for implementation details.</p>
+<p><strong>Note:</strong> Older versions of textacy (&lt;0.7.0) used a <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> class
+as a convenient wrapper around an underlying spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code>, with additional
+functionality available as class attributes and methods. Once spaCy started
+natively supporting custom extensions on <code class="docutils literal notranslate"><span class="pre">Doc</span></code> objects (as well as custom
+components in language processing pipelines), this approach made less sense.</p>
 </div>
 <div class="section" id="analyze-a-doc">
 <h2>Analyze a Doc<a class="headerlink" href="#analyze-a-doc" title="Permalink to this headline">¶</a></h2>
@@ -146,9 +150,9 @@ extract various elements of interest:</p>
 <span class="go"> corpora of typical]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">ngrams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 <span class="go">[Natural Language, natural language]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">named_entities</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
-<span class="go">[late 1980s, mid 1990s, Natural Language Processing]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pattern</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">POS_REGEX_PATTERNS</span><span class="p">[</span><span class="s1">&#39;en&#39;</span><span class="p">][</span><span class="s1">&#39;NP&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">entities</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="go">[late 1980s and mid 1990s]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pattern</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">POS_REGEX_PATTERNS</span><span class="p">[</span><span class="s2">&quot;en&quot;</span><span class="p">][</span><span class="s2">&quot;NP&quot;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pattern</span>
 <span class="go">&#39;&lt;DET&gt;? &lt;NUM&gt;* (&lt;ADJ&gt; &lt;PUNCT&gt;? &lt;CONJ&gt;?)* (&lt;NOUN&gt;|&lt;PROPN&gt; &lt;PART&gt;?)+&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">textacy</span><span class="o">.</span><span class="n">extract</span><span class="o">.</span><span class="n">pos_regex_matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pattern</span><span class="p">))</span>
@@ -173,18 +177,18 @@ extract various elements of interest:</p>
 </div>
 <p>We can also identify key terms in a document by a number of algorithms:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy.keyterms</span>  <span class="c1"># note the import</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">keyterms</span><span class="o">.</span><span class="n">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="go">[(&#39;language&#39;, 0.06469840439566026),</span>
-<span class="go"> (&#39;rule&#39;, 0.05652651341294322),</span>
-<span class="go"> (&#39;machine&#39;, 0.05257062044951949),</span>
-<span class="go"> (&#39;statistical&#39;, 0.04292595119686373),</span>
-<span class="go"> (&#39;natural&#39;, 0.04177948765003742),</span>
-<span class="go"> (&#39;world&#39;, 0.03970175136498526),</span>
-<span class="go"> (&#39;real&#39;, 0.037150947215394275),</span>
-<span class="go"> (&#39;typical&#39;, 0.03554707044022466),</span>
-<span class="go"> (&#39;corpora&#39;, 0.034313898275359044),</span>
-<span class="go"> (&#39;large&#39;, 0.0330254168906275)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">keyterms</span><span class="o">.</span><span class="n">sgrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">keyterms</span><span class="o">.</span><span class="n">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">[(&#39;rule&#39;, 0.053388673426165274),</span>
+<span class="go"> (&#39;language&#39;, 0.051393874215877614),</span>
+<span class="go"> (&#39;machine&#39;, 0.05117898985460108),</span>
+<span class="go"> (&#39;statistical&#39;, 0.04067363609786232),</span>
+<span class="go"> (&#39;world&#39;, 0.03714841125591235),</span>
+<span class="go"> (&#39;real&#39;, 0.034770679620166826),</span>
+<span class="go"> (&#39;typical&#39;, 0.033277268136629116),</span>
+<span class="go"> (&#39;corpora&#39;, 0.03214591053006896),</span>
+<span class="go"> (&#39;1990&#39;, 0.03162874015505505),</span>
+<span class="go"> (&#39;mid&#39;, 0.031567325030955926)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">keyterms</span><span class="o">.</span><span class="n">sgrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="go">[(&#39;natural language processing research&#39;, 0.31188112358833325),</span>
 <span class="go"> (&#39;natural language variation&#39;, 0.09554941648195946),</span>
 <span class="go"> (&#39;direct hand coding&#39;, 0.09461396545586934),</span>
@@ -200,58 +204,58 @@ extract various elements of interest:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">n_unique_words</span>
 <span class="go">57</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">basic_counts</span>
-<span class="go">{&#39;n_chars&#39;: 414,</span>
-<span class="go"> &#39;n_long_words&#39;: 30,</span>
-<span class="go"> &#39;n_monosyllable_words&#39;: 38,</span>
-<span class="go"> &#39;n_polysyllable_words&#39;: 19,</span>
-<span class="go"> &#39;n_sents&#39;: 3,</span>
+<span class="go">{&#39;n_sents&#39;: 3,</span>
+<span class="go"> &#39;n_words&#39;: 73,</span>
+<span class="go"> &#39;n_chars&#39;: 414,</span>
 <span class="go"> &#39;n_syllables&#39;: 134,</span>
 <span class="go"> &#39;n_unique_words&#39;: 57,</span>
-<span class="go"> &#39;n_words&#39;: 73}</span>
+<span class="go"> &#39;n_long_words&#39;: 30,</span>
+<span class="go"> &#39;n_monosyllable_words&#39;: 38,</span>
+<span class="go"> &#39;n_polysyllable_words&#39;: 19}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">flesch_kincaid_grade_level</span>
 <span class="go">15.56027397260274</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">readability_stats</span>
-<span class="go">{&#39;automated_readability_index&#39;: 17.448173515981736,</span>
-<span class="go"> &#39;coleman_liau_index&#39;: 16.32928468493151,</span>
-<span class="go"> &#39;flesch_kincaid_grade_level&#39;: 15.56027397260274,</span>
+<span class="go">{&#39;flesch_kincaid_grade_level&#39;: 15.56027397260274,</span>
 <span class="go"> &#39;flesch_reading_ease&#39;: 26.84351598173518,</span>
-<span class="go"> &#39;gulpease_index&#39;: 44.61643835616438,</span>
-<span class="go"> &#39;gunning_fog_index&#39;: 20.144292237442922,</span>
-<span class="go"> &#39;lix&#39;: 65.42922374429223,</span>
 <span class="go"> &#39;smog_index&#39;: 17.5058628484301,</span>
+<span class="go"> &#39;gunning_fog_index&#39;: 20.144292237442922,</span>
+<span class="go"> &#39;coleman_liau_index&#39;: 16.32928468493151,</span>
+<span class="go"> &#39;automated_readability_index&#39;: 17.448173515981736,</span>
+<span class="go"> &#39;lix&#39;: 65.42922374429223,</span>
+<span class="go"> &#39;gulpease_index&#39;: 44.61643835616438,</span>
 <span class="go"> &#39;wiener_sachtextformel&#39;: 11.857779908675797}</span>
 </pre></div>
 </div>
 <p>Lastly, we can transform a document into a “bag of terms”, with flexible weighting
 and term inclusion criteria:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bot</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">to_bag_of_terms</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">named_entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bot</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">to_bag_of_terms</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">bot</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="mi">15</span><span class="p">]</span>
-<span class="go">[(&#39;language&#39;, 3),</span>
-<span class="go"> (&#39;call&#39;, 2),</span>
+<span class="go">[(&#39;call&#39;, 2),</span>
 <span class="go"> (&#39;statistical&#39;, 2),</span>
-<span class="go"> (&#39;natural&#39;, 2),</span>
 <span class="go"> (&#39;machine&#39;, 2),</span>
+<span class="go"> (&#39;language&#39;, 2),</span>
 <span class="go"> (&#39;rule&#39;, 2),</span>
 <span class="go"> (&#39;learn&#39;, 2),</span>
-<span class="go"> (&#39;natural language&#39;, 2),</span>
-<span class="go"> (&#39;late 1980&#39;, 1),</span>
-<span class="go"> (&#39;mid 1990&#39;, 1),</span>
-<span class="go"> (&#39;natural language processing&#39;, 1),</span>
-<span class="go"> (&#39;since&#39;, 1),</span>
+<span class="go"> (&#39;late 1980 and mid 1990&#39;, 1),</span>
 <span class="go"> (&#39;revolution&#39;, 1),</span>
 <span class="go"> (&#39;late&#39;, 1),</span>
-<span class="go"> (&#39;1980&#39;, 1)]</span>
+<span class="go"> (&#39;1980&#39;, 1),</span>
+<span class="go"> (&#39;mid&#39;, 1),</span>
+<span class="go"> (&#39;1990&#39;, 1),</span>
+<span class="go"> (&#39;Natural&#39;, 1),</span>
+<span class="go"> (&#39;Language&#39;, 1),</span>
+<span class="go"> (&#39;Processing&#39;, 1)]</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="working-with-many-texts">
 <h2>Working with Many Texts<a class="headerlink" href="#working-with-many-texts" title="Permalink to this headline">¶</a></h2>
 <p>Many NLP tasks require datasets comprised of a large number of texts, which
-are often stored on disk in one or multiple files. <code class="docutils literal notranslate"><span class="pre">textacy</span></code> makes it easy
-to efficiently stream text (+metadata) records from disk, regardless of the
-format or compression of the data.</p>
+are often stored on disk in one or multiple files. textacy makes it easy
+to efficiently stream text and (text, metadata) pairs from disk, regardless of
+the format or compression of the data.</p>
 <p>Let’s start with a single text file, where each line is a new text document:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>I love Daylight Savings Time: It&#39;s a biannual opportunity to find and fix obscure date-time bugs in your code. Can&#39;t wait for next time!
 Somewhere between &quot;this is irritating but meh&quot; and &quot;blergh, why haven&#39;t I automated this yet?!&quot; Fuzzy decision boundary.
@@ -261,11 +265,11 @@ Spent an entire day translating structured data blobs into concise, readable sen
 </div>
 <p>In this case, the texts are tweets from my sporadic presence on Twitter —
 a fine example of small (and boring) data. Let’s stream it from disk so we
-can analyze it in <code class="docutils literal notranslate"><span class="pre">textacy</span></code>:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">texts</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="s1">&#39;../../Desktop/burton-tweets.txt&#39;</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+can analyze it in textacy:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">texts</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="s1">&#39;~/Desktop/burton-tweets.txt&#39;</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">make_spacy_doc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">preview</span><span class="p">)</span>
 <span class="go">Doc(32 tokens; &quot;I love Daylight Savings Time: It&#39;s a biannual o...&quot;)</span>
 <span class="go">Doc(28 tokens; &quot;Somewhere between &quot;this is irritating but meh&quot; ...&quot;)</span>
 <span class="go">Doc(20 tokens; &quot;Spent an entire day translating structured data...&quot;)</span>
@@ -276,155 +280,166 @@ can analyze it in <code class="docutils literal notranslate"><span class="pre">t
 <p>Instead, let’s consider a more complicated dataset: a compressed JSON file in the
 mostly-standard “lines” format, in which each line is a separate record with both
 text data and metadata fields. As an example, we can use the “Capitol Words” dataset
-integrated into <code class="docutils literal notranslate"><span class="pre">textacy</span></code> (see <a class="reference internal" href="../api_reference.html#ref-api-datasets"><span class="std std-ref">Datasets</span></a> for details). The data
+integrated into textacy (see <a class="reference internal" href="../api_reference.html#ref-api-datasets"><span class="std std-ref">datasets</span></a> for details). The data
 is downloadable from the <a class="reference external" href="https://github.com/bdewilde/textacy-data/releases/tag/capitol_words_py3_v1.0">textacy-data GitHub repository</a>.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">records</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;textacy/data/capitol_words/capitol-words-py3.json.gz&#39;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rt&#39;</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="s2">&quot;textacy/data/capitol_words/capitol-words-py3.json.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rt&quot;</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span> <span class="n">metadata</span><span class="o">=</span><span class="n">record</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
-<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">make_spacy_doc</span><span class="p">((</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">],</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]}))</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">preview</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;meta:&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">meta</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="c1"># do stuff...</span>
 <span class="gp">... </span>    <span class="k">break</span>
 <span class="go">Doc(159 tokens; &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;)</span>
+<span class="go">meta: {&#39;title&#39;: &#39;JOIN THE SENATE AND PASS A CONTINUING RESOLUTION&#39;}</span>
 </pre></div>
 </div>
 <p>For this and a few other datasets, convenient <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> classes are already
-implemented in <code class="docutils literal notranslate"><span class="pre">textacy</span></code> to help users get up and running, faster:</p>
+implemented in textacy to help users get up and running, faster:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy.datasets</span>  <span class="c1"># note the import</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cw</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CapitolWords</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cw</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">records</span> <span class="o">=</span> <span class="n">cw</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">speaker_name</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Hillary Clinton&#39;</span><span class="p">,</span> <span class="s1">&#39;Barack Obama&#39;</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadata_stream</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">split_records</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CapitolWords</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">records</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">speaker_name</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Hillary Clinton&quot;</span><span class="p">,</span> <span class="s2">&quot;Barack Obama&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">next</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+<span class="go">(&#39;I yield myself 15 minutes of the time controlled by the Democrats.&#39;,</span>
+<span class="go"> {&#39;date&#39;: &#39;2001-02-13&#39;,</span>
+<span class="go">  &#39;congress&#39;: 107,</span>
+<span class="go">  &#39;speaker_name&#39;: &#39;Hillary Clinton&#39;,</span>
+<span class="go">  &#39;speaker_party&#39;: &#39;D&#39;,</span>
+<span class="go">  &#39;title&#39;: &#39;MORNING BUSINESS&#39;,</span>
+<span class="go">  &#39;chamber&#39;: &#39;Senate&#39;})</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="make-a-corpus">
 <h2>Make a Corpus<a class="headerlink" href="#make-a-corpus" title="Permalink to this headline">¶</a></h2>
-<p>A <code class="docutils literal notranslate"><span class="pre">textacy.Corpus</span></code> is an ordered collection of <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> s, all processed
-by the same spacy language pipeline. Let’s continue with the Capitol Words dataset
-and make a corpus from text and metadata streams (<strong>Note:</strong> This may take a
-few minutes):</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="p">(</span><span class="s1">&#39;en&#39;</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">text_stream</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="n">metadata_stream</span><span class="p">)</span>
+<p>A <code class="docutils literal notranslate"><span class="pre">textacy.Corpus</span></code> is an ordered collection of spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s, all processed
+by the same language pipeline. Let’s continue with the Capitol Words dataset
+and make a corpus from a stream of records. (<strong>Note:</strong> This may take a
+few minutes.)</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">records</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span>
-<span class="go">Corpus(1241 docs; 857058 tokens)</span>
+<span class="go">Corpus(1240 docs, 857548 tokens)</span>
 </pre></div>
 </div>
-<p>As for a <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code>, the language pipeline used to analyze the texts in a
-corpus is configurable, and metadata is optional. You can also add in already-
-processed <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s instead of raw texts.</p>
+<p>The language pipeline used to analyze documents in the corpus must be specified
+on instantiation, but the data added to it may come in the form of one or a stream
+of texts, records, or (valid) <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">textacy</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="s1">&#39;en_core_web_sm&#39;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parser&#39;</span><span class="p">,</span> <span class="s1">&#39;tagger&#39;</span><span class="p">)),</span>
-<span class="gp">... </span>    <span class="n">texts</span><span class="o">=</span><span class="n">cw</span><span class="o">.</span><span class="n">texts</span><span class="p">(</span><span class="n">speaker_party</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">chamber</span><span class="o">=</span><span class="s1">&#39;House&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
-<span class="go">Corpus(100 docs; 31410 tokens)</span>
+<span class="gp">... </span>    <span class="n">textacy</span><span class="o">.</span><span class="n">load_spacy_lang</span><span class="p">(</span><span class="s2">&quot;en_core_web_sm&quot;</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;parser&quot;</span><span class="p">,</span> <span class="s2">&quot;tagger&quot;</span><span class="p">)),</span>
+<span class="gp">... </span>    <span class="n">data</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">texts</span><span class="p">(</span><span class="n">speaker_party</span><span class="o">=</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="n">chamber</span><span class="o">=</span><span class="s2">&quot;House&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+<span class="go">Corpus(100 docs, 31356 tokens)</span>
 </pre></div>
 </div>
 <p>You can use basic indexing as well as flexible boolean queries to select
 documents in a corpus:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="go">Doc(2999 tokens; &quot;In the Federalist Papers, we often hear the ref...&quot;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span>
-<span class="go">[Doc(44 tokens; &quot;I thank the Chair. (The remarks of Mrs. Clinton...&quot;),</span>
-<span class="go"> Doc(359 tokens; &quot;My good friend from Connecticut raised an issue...&quot;),</span>
-<span class="go"> Doc(83 tokens; &quot;My question would be: In response to the discus...&quot;),</span>
-<span class="go"> Doc(3338 tokens; &quot;Madam President, I come to the floor today to s...&quot;),</span>
-<span class="go"> Doc(221 tokens; &quot;Mr. President, I rise in support of Senator Tho...&quot;)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">obama_docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">corpus</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="k">lambda</span> <span class="n">doc</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;speaker_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Barack Obama&#39;</span><span class="p">))</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">preview</span>
+<span class="go">&#39;Doc(2999 tokens: &quot;In the Federalist Papers, we often hear the ref...&quot;)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">preview</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">corpus</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">15</span><span class="p">]]</span>
+<span class="go">[&#39;Doc(359 tokens: &quot;My good friend from Connecticut raised an issue...&quot;)&#39;,</span>
+<span class="go"> &#39;Doc(83 tokens: &quot;My question would be: In response to the discus...&quot;)&#39;,</span>
+<span class="go"> &#39;Doc(3338 tokens: &quot;Madam President, I come to the floor today to s...&quot;)&#39;,</span>
+<span class="go"> &#39;Doc(221 tokens: &quot;Mr. President, I rise in support of Senator Tho...&quot;)&#39;,</span>
+<span class="go"> &#39;Doc(3061 tokens: &quot;Mr. President, I thank my distinguished colleag...&quot;)&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obama_docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">corpus</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="k">lambda</span> <span class="n">doc</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;speaker_name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Barack Obama&quot;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">obama_docs</span><span class="p">)</span>
 <span class="go">411</span>
 </pre></div>
 </div>
 <p>It’s important to note that all of the data in a <code class="docutils literal notranslate"><span class="pre">textacy.Corpus</span></code> is stored
 in-memory, which makes a number of features much easier to implement.
-Unfortunately, this means that the maximum size of a corpus will be bound by RAM.</p>
+Unfortunately, this means that the maximum size of a corpus will be bounded by RAM.</p>
 </div>
 <div class="section" id="analyze-a-corpus">
 <h2>Analyze a Corpus<a class="headerlink" href="#analyze-a-corpus" title="Permalink to this headline">¶</a></h2>
 <p>There are lots of ways to analyze the data in a corpus. Basic stats are
 computed on the fly as documents are added (or removed) from a corpus:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">n_docs</span><span class="p">,</span> <span class="n">corpus</span><span class="o">.</span><span class="n">n_sents</span><span class="p">,</span> <span class="n">corpus</span><span class="o">.</span><span class="n">n_tokens</span>
-<span class="go">(1241, 33710, 858097)</span>
+<span class="go">(1240, 34530, 857548)</span>
 </pre></div>
 </div>
 <p>You can transform a corpus into a document-term matrix, with flexible tokenization,
 weighting, and filtering of terms:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vectorizer</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Vectorizer</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">tf_type</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">apply_idf</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="s1">&#39;smooth&#39;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy.vsm</span>  <span class="c1"># note the import</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vectorizer</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Vectorizer</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">tf_type</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">apply_idf</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">idf_type</span><span class="o">=</span><span class="s2">&quot;smooth&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;l2&quot;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">min_df</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_df</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc_term_matrix</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">to_terms_list</span><span class="p">(</span><span class="n">ngrams</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">named_entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">to_terms_list</span><span class="p">(</span><span class="n">ngrams</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">entities</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">... </span>     <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">corpus</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">))</span>
-<span class="go">&lt;1241x11800 sparse matrix of type &#39;&lt;class &#39;numpy.float64&#39;&gt;&#39;</span>
-<span class="go">        with 225946 stored elements in Compressed Sparse Row format&gt;</span>
+<span class="go">&lt;1240x12577 sparse matrix of type &#39;&lt;class &#39;numpy.float64&#39;&gt;&#39;</span>
+<span class="go">    with 217067 stored elements in Compressed Sparse Row format&gt;</span>
 </pre></div>
 </div>
 <p>From a doc-term matrix, you can then train and interpret a topic model:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">TopicModel</span><span class="p">(</span><span class="s1">&#39;nmf&#39;</span><span class="p">,</span> <span class="n">n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">textacy.tm</span>  <span class="c1"># note the import</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">tm</span><span class="o">.</span><span class="n">TopicModel</span><span class="p">(</span><span class="s2">&quot;nmf&quot;</span><span class="p">,</span> <span class="n">n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc_topic_matrix</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc_topic_matrix</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1241, 10)</span>
+<span class="go">(1240, 10)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">topic_idx</span><span class="p">,</span> <span class="n">top_terms</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">top_topic_terms</span><span class="p">(</span><span class="n">vectorizer</span><span class="o">.</span><span class="n">id_to_term</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;topic&#39;</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">top_terms</span><span class="p">))</span>
-<span class="go">topic 0 : -PRON-      new   people   senator   &#39;s   work   york   bill   the</span>
-<span class="go">topic 1 : rescind   quorum   order   unanimous   consent   ask   president   -PRON-   mr.   madam</span>
-<span class="go">topic 2 : dispense   reading   unanimous   consent   amendment   ask   -PRON-   president   mr.   madam</span>
-<span class="go">topic 3 : student   school   education   college   child   teacher   program   high   loan   graduate</span>
-<span class="go">topic 4 : desire   chamber   be   senators   vote   voter   rollcall   objection   2313   regular</span>
-<span class="go">topic 5 : amendment   pend   aside   set   ask   -PRON-   unanimous   consent   no   mr.</span>
-<span class="go">topic 6 : health   care   child   mental   patient   quality   medical      program   system</span>
-<span class="go">topic 7 : iraq   war   troop   iraqi   iraqis   military   policy      escalation   u.s.</span>
-<span class="go">topic 8 : session   authorize   unanimous   consent   senate   p.m.   a.m.   september   committee   hearing</span>
-<span class="go">topic 9 : security   homeland   funding   9/11   commission   risk   department   threat   emergency   police</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;topic&quot;</span><span class="p">,</span> <span class="n">topic_idx</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;   &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">top_terms</span><span class="p">))</span>
+<span class="go">topic 0 : New   people   child   work   need   York   bill   year   school   student</span>
+<span class="go">topic 1 : rescind   quorum   order   unanimous   consent   ask   President   Mr.   Madam   objection</span>
+<span class="go">topic 2 : dispense   reading   unanimous   consent   amendment   ask   President   Mr.   Madam   OFFICER</span>
+<span class="go">topic 3 : motion   table   lay   reconsider   agree   thereto   Madam   preamble   intervene   print</span>
+<span class="go">topic 4 : desire   Chamber   vote   Senators   rollcall   voter   amendment   2313   regular   cloture</span>
+<span class="go">topic 5 : amendment   pende   aside   set   ask   unanimous   consent   Mr.   President   desk</span>
+<span class="go">topic 6 : health   care   patient   Health   mental   quality   child   medical   information   coverage</span>
+<span class="go">topic 7 : Iraq   war   troop   iraqi   Iraqis   policy   military   american   U.S.   force</span>
+<span class="go">topic 8 : tax   budget   cut   debt   pay   deficit   $   fiscal   billion   spending</span>
+<span class="go">topic 9 : Senator   Virginia   yield   West Virginia   West   question   thank   Massachusetts   objection   time</span>
 </pre></div>
 </div>
 <p>And that’s just getting started! For now, though, I encourage you to pick a dataset
-— either your own or one already included in <code class="docutils literal notranslate"><span class="pre">textacy</span></code> — and start exploring
+— either your own or one already included in textacy — and start exploring
 the data. <em>Most</em> functionality is well-documented via in-code docstrings; to see
 that information all together in nicely-formatted HTML, be sure to check out
 the <a class="reference internal" href="../api_reference.html#ref-api-reference"><span class="std std-ref">API Reference</span></a>.</p>
 </div>
 <div class="section" id="working-with-many-languages">
 <h2>Working with Many Languages<a class="headerlink" href="#working-with-many-languages" title="Permalink to this headline">¶</a></h2>
-<p>Since a <code class="docutils literal notranslate"><span class="pre">Corpus</span></code> uses the same spacy language pipeline to process all input texts,
-it only works in a <em>monolingual</em> context. In some cases, though, your collection
+<p>Since a <code class="docutils literal notranslate"><span class="pre">Corpus</span></code> uses the same spaCy language pipeline to process all input texts,
+it only works in a mono-lingual context. In some cases, though, your collection
 of texts may contain more than one language; for example, if I occasionally tweeted
 in Spanish (sí, ¡se habla español!), the <code class="docutils literal notranslate"><span class="pre">burton-tweets.txt</span></code> dataset couldn’t
 be fed in its entirety into a single <code class="docutils literal notranslate"><span class="pre">Corpus</span></code>. This is irritating, I know, but
 there are some workarounds.</p>
-<p>If you haven’t already, download spacy models for the languages you want to analyze —
+<p>If you haven’t already, download spaCy models for the languages you want to analyze —
 see <a class="reference internal" href="installation.html#installation-downloading-data"><span class="std std-ref">Downloading Data</span></a> for details. Then, if your use case
 doesn’t require <code class="docutils literal notranslate"><span class="pre">Corpus</span></code> functionality, you can iterate over the texts and
 only analyze those for which models are available:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">try</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">doc</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">make_spacy_doc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
 <span class="gp">... </span>        <span class="k">continue</span>
 <span class="gp">... </span>    <span class="c1"># do stuff...</span>
 </pre></div>
 </div>
 <p>When the <code class="docutils literal notranslate"><span class="pre">lang</span></code> param is unspecified, textacy tries to auto-detect the text’s
-language and load the corresponding model; if that model is unavailable, spacy
-will raise an <code class="docutils literal notranslate"><span class="pre">IOError</span></code>. This try/except also handles the case where
+language and load the corresponding model; if that model is unavailable, spaCy
+will raise an <code class="docutils literal notranslate"><span class="pre">OSError</span></code>. This try/except also handles the case where
 language detection fails and returns, say, “un” for “unknown”.</p>
 <p>If you do need a <code class="docutils literal notranslate"><span class="pre">Corpus</span></code>, you can split the input texts by language into
 distinct collections, then instantiate monolingual corpora on those collections.
 For example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">en_corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">(</span>
 <span class="gp">... </span>        <span class="n">text</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span>
-<span class="gp">... </span>        <span class="k">if</span> <span class="n">textacy</span><span class="o">.</span><span class="n">text_utils</span><span class="o">.</span><span class="n">detect_language</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;en&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">textacy</span><span class="o">.</span><span class="n">lang_utils</span><span class="o">.</span><span class="n">detect_lang</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;en&quot;</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">es_corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s2">&quot;es&quot;</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;es&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">(</span>
 <span class="gp">... </span>        <span class="n">text</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span>
-<span class="gp">... </span>        <span class="k">if</span> <span class="n">textacy</span><span class="o">.</span><span class="n">text_utils</span><span class="o">.</span><span class="n">detect_language</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;es&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">textacy</span><span class="o">.</span><span class="n">lang_utils</span><span class="o">.</span><span class="n">detect_lang</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;es&quot;</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Both of these options are less convenient than we’d like, but hopefully they
+<p>Both of these options are less convenient than I’d like, but hopefully they
 get the job done.</p>
 </div>
 </div>
@@ -500,8 +515,6 @@ get the job done.</p>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -514,7 +527,7 @@ get the job done.</p>
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

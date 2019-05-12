@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.corpus &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -35,178 +33,152 @@
   <h1>Source code for textacy.corpus</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Load, process, iterate, transform, and save a collection of documents — a corpus.</span>
+<span class="sd">A class for working with a collection of spaCy docs. Includes functionality for</span>
+<span class="sd">easily adding, getting, and removing documents; saving to / loading their data</span>
+<span class="sd">from disk; and tracking basic corpus statistics.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">spacy</span>
+<span class="kn">import</span> <span class="nn">srsly</span>
 <span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
-<span class="kn">from</span> <span class="nn">spacy.language</span> <span class="k">import</span> <span class="n">Language</span> <span class="k">as</span> <span class="n">SpacyLang</span>
-<span class="kn">from</span> <span class="nn">spacy.pipeline</span> <span class="k">import</span> <span class="n">DependencyParser</span>
-<span class="kn">from</span> <span class="nn">spacy.tokens.doc</span> <span class="k">import</span> <span class="n">Doc</span> <span class="k">as</span> <span class="n">SpacyDoc</span>
-<span class="kn">from</span> <span class="nn">spacy.util</span> <span class="k">import</span> <span class="n">get_lang_class</span>
+<span class="kn">from</span> <span class="nn">thinc.neural.ops</span> <span class="k">import</span> <span class="n">NumpyOps</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">cache</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">io</span> <span class="k">as</span> <span class="n">tio</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">.doc</span> <span class="k">import</span> <span class="n">Doc</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Corpus"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus">[docs]</a><span class="k">class</span> <span class="nc">Corpus</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An ordered collection of :class:`Doc &lt;textacy.doc.Doc&gt;` s, all of the</span>
-<span class="sd">    same language and sharing the same ``spacy.Language`` models and vocabulary.</span>
-<span class="sd">    Track corpus statistics; flexibly add, iterate through, filter for, and</span>
-<span class="sd">    remove documents; save and load parsed content and metadata to and from</span>
-<span class="sd">    disk; and more.</span>
+<span class="sd">    An ordered collection of :class:`spacy.tokens.Doc`, all of the same language</span>
+<span class="sd">    and sharing the same :class:`spacy.language.Language` processing pipeline</span>
+<span class="sd">    and vocabulary, with data held *in-memory*.</span>
 
-<span class="sd">    Initialize from a stream of texts and corresponding metadatas::</span>
+<span class="sd">    Initialize from a language / ``Language`` and (optionally) one or a stream</span>
+<span class="sd">    of texts or (text, metadata) pairs:</span>
 
-<span class="sd">        &gt;&gt;&gt; cw = textacy.datasets.CapitolWords()</span>
-<span class="sd">        &gt;&gt;&gt; records = cw.docs(limit=50)</span>
-<span class="sd">        &gt;&gt;&gt; text_stream, metadata_stream = textacy.io.split_records(</span>
-<span class="sd">        ...     records, &#39;text&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus(</span>
-<span class="sd">        ...     &#39;en&#39;, texts=text_stream, metadatas=metadata_stream)</span>
-<span class="sd">        &gt;&gt;&gt; print(corpus)</span>
-<span class="sd">        Corpus(50 docs; 32163 tokens)</span>
+<span class="sd">    .. code-block:: pycon</span>
 
-<span class="sd">    Index, slice, and flexibly get particular documents::</span>
+<span class="sd">        &gt;&gt;&gt; ds = textacy.datasets.CapitolWords()</span>
+<span class="sd">        &gt;&gt;&gt; records = ds.records(limit=50)</span>
+<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus(&quot;en&quot;, data=records)</span>
+<span class="sd">        &gt;&gt;&gt; corpus</span>
+<span class="sd">        Corpus(50 docs, 32175 tokens)</span>
 
-<span class="sd">        &gt;&gt;&gt; corpus[0]</span>
-<span class="sd">        Doc(159 tokens; &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; corpus[:3]</span>
-<span class="sd">        [Doc(159 tokens; &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;),</span>
-<span class="sd">         Doc(219 tokens; &quot;Mr. Speaker, a relationship, to work and surviv...&quot;),</span>
-<span class="sd">         Doc(336 tokens; &quot;Mr. Speaker, I thank the gentleman for yielding...&quot;)]</span>
-<span class="sd">        &gt;&gt;&gt; match_func = lambda doc: doc.metadata[&#39;speaker_name&#39;] == &#39;Bernie Sanders&#39;</span>
+<span class="sd">    Add or remove documents, with automatic updating of corpus statistics:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; texts = ds.texts(congress=114, limit=25)</span>
+<span class="sd">        &gt;&gt;&gt; corpus.add(texts)</span>
+<span class="sd">        &gt;&gt;&gt; corpus.add(&quot;If Burton were a member of Congress, here&#39;s what he&#39;d say.&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; corpus</span>
+<span class="sd">        Corpus(76 docs, 55906 tokens)</span>
+<span class="sd">        &gt;&gt;&gt; corpus.remove(lambda doc: doc._.meta.get(&quot;speaker_name&quot;) == &quot;Rick Santorum&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; corpus</span>
+<span class="sd">        Corpus(67 docs, 50662 tokens)</span>
+
+<span class="sd">    Get subsets of documents matching your particular use case:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; match_func = lambda doc: doc._.meta.get(&quot;speaker_name&quot;) == &quot;Bernie Sanders&quot;</span>
 <span class="sd">        &gt;&gt;&gt; for doc in corpus.get(match_func, limit=3):</span>
-<span class="sd">        ...     print(doc)</span>
-<span class="sd">        Doc(159 tokens; &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;)</span>
-<span class="sd">        Doc(336 tokens; &quot;Mr. Speaker, I thank the gentleman for yielding...&quot;)</span>
-<span class="sd">        Doc(177 tokens; &quot;Mr. Speaker, if we want to understand why in th...&quot;)</span>
+<span class="sd">        ...     print(doc._.preview)</span>
+<span class="sd">        Doc(159 tokens: &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;)</span>
+<span class="sd">        Doc(336 tokens: &quot;Mr. Speaker, I thank the gentleman for yielding...&quot;)</span>
+<span class="sd">        Doc(177 tokens: &quot;Mr. Speaker, if we want to understand why in th...&quot;)</span>
 
-<span class="sd">    Add and remove documents, with automatic updating of corpus statistics::</span>
+<span class="sd">    Get or remove documents by indexing, too:</span>
 
-<span class="sd">        &gt;&gt;&gt; records = cw.docs(congress=114, limit=25)</span>
-<span class="sd">        &gt;&gt;&gt; text_stream, metadata_stream = textacy.io.split_records(</span>
-<span class="sd">        ...     records, &#39;text&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; corpus.add_texts(text_stream, metadatas=metadata_stream)</span>
-<span class="sd">        &gt;&gt;&gt; print(corpus)</span>
-<span class="sd">        Corpus(75 docs; 55869 tokens)</span>
-<span class="sd">        &gt;&gt;&gt; corpus.remove(lambda doc: doc.metadata[&#39;speaker_name&#39;] == &#39;Rick Santorum&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(corpus)</span>
-<span class="sd">        Corpus(60 docs; 48532 tokens)</span>
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; corpus[0]._.preview</span>
+<span class="sd">        &#39;Doc(159 tokens: &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;)&#39;</span>
+<span class="sd">        &gt;&gt;&gt; [doc._.preview for doc in corpus[:3]]</span>
+<span class="sd">        [&#39;Doc(159 tokens: &quot;Mr. Speaker, 480,000 Federal employees are work...&quot;)&#39;,</span>
+<span class="sd">         &#39;Doc(219 tokens: &quot;Mr. Speaker, a relationship, to work and surviv...&quot;)&#39;,</span>
+<span class="sd">         &#39;Doc(336 tokens: &quot;Mr. Speaker, I thank the gentleman for yielding...&quot;)&#39;]</span>
 <span class="sd">        &gt;&gt;&gt; del corpus[:5]</span>
-<span class="sd">        &gt;&gt;&gt; print(corpus)</span>
-<span class="sd">        Corpus(55 docs; 47444 tokens)</span>
+<span class="sd">        &gt;&gt;&gt; corpus</span>
+<span class="sd">        Corpus(62 docs, 49754 tokens)</span>
 
-<span class="sd">    Get word and doc frequencies in absolute, relative, or binary form:</span>
+<span class="sd">    Compute basic corpus statistics:</span>
 
-<span class="sd">        &gt;&gt;&gt; counts = corpus.word_freqs(lemmatize=True, weighting=&#39;count&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; idf = corpus.word_doc_freqs(lemmatize=True, weighting=&#39;idf&#39;)</span>
+<span class="sd">    .. code-block:: pycon</span>
 
-<span class="sd">    Save to and load from disk::</span>
+<span class="sd">        &gt;&gt;&gt; corpus.n_docs, corpus.n_sents, corpus.n_tokens</span>
+<span class="sd">        (62, 2193, 49754)</span>
+<span class="sd">        &gt;&gt;&gt; word_counts = corpus.word_counts(as_strings=True)</span>
+<span class="sd">        &gt;&gt;&gt; sorted(word_counts.items(), key=lambda x: x[1], reverse=True)[:5]</span>
+<span class="sd">        [(&#39;-PRON-&#39;, 3068), (&#39;people&#39;, 248), (&#39;year&#39;, 171), (&#39;work&#39;, 156), (&#39;$&#39;, 153)]</span>
+<span class="sd">        &gt;&gt;&gt; word_doc_counts = corpus.word_doc_counts(weighting=&quot;freq&quot;, as_strings=True)</span>
+<span class="sd">        &gt;&gt;&gt; sorted(word_doc_counts.items(), key=lambda x: x[1], reverse=True)[:5]</span>
+<span class="sd">        [(&#39;-PRON-&#39;, 0.9838709677419355),</span>
+<span class="sd">         (&#39;Mr.&#39;, 0.7258064516129032),</span>
+<span class="sd">         (&#39;President&#39;, 0.5483870967741935),</span>
+<span class="sd">         (&#39;ask&#39;, 0.45161290322580644),</span>
+<span class="sd">         (&#39;year&#39;, 0.45161290322580644)]</span>
 
-<span class="sd">        &gt;&gt;&gt; corpus.save(&#39;~/Desktop/congress.pkl&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus.load(&#39;~/Desktop/congress.pkl&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(corpus)</span>
-<span class="sd">        Corpus(55 docs; 47444 tokens)</span>
+<span class="sd">    Save corpus data to and load from disk:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; corpus.save(&quot;~/Desktop/capitol_words_sample.bin&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus.load(&quot;en&quot;, &quot;~/Desktop/capitol_words_sample.bin&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; corpus</span>
+<span class="sd">        Corpus(62 docs, 49754 tokens)</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        lang (str or ``spacy.Language``): Language of content for all docs in</span>
-<span class="sd">            corpus. Pass a standard 2-letter language code (e.g. &quot;en&quot;) or the name</span>
-<span class="sd">            of a spacy model for the desired language (e.g. &quot;en_core_web_md&quot;)</span>
-<span class="sd">            or an already-instantiated ``spacy.Language`` object. If a str, the</span>
-<span class="sd">            value is used to instantiate the corresponding ``spacy.Language``</span>
-<span class="sd">            with all models loaded by default, and the appropriate 2-letter lang</span>
-<span class="sd">            code is assigned to :attr:`Corpus.lang`.</span>
+<span class="sd">        lang (str or :class:`spacy.language.Language`):</span>
+<span class="sd">            Language with which spaCy processes (or processed) all documents</span>
+<span class="sd">            added to the corpus, whether as ``data`` now or later.</span>
 
-<span class="sd">            **Note:** The ``spacy.Language`` object parses all documents contents</span>
-<span class="sd">            and sets the :attr:`spacy_vocab` and :attr:`spacy_stringstore`</span>
-<span class="sd">            attributes. See https://spacy.io/docs/usage/models#available for</span>
-<span class="sd">            available spacy models.</span>
-<span class="sd">        texts (Iterable[str]): Stream of documents as (unicode) text, to be</span>
-<span class="sd">            processed by spaCy and added to the corpus as</span>
-<span class="sd">            :class:`Doc &lt;textacy.doc.Doc&gt;` s.</span>
-<span class="sd">        docs (Iterable[:class:`Doc &lt;textacy.doc.Doc&gt;`] or Iterable[``spacy.Doc``]):</span>
-<span class="sd">            Stream of documents already-processed by spaCy alone or via textacy.</span>
-<span class="sd">        metadatas (Iterable[dict]): Stream of dictionaries of relevant doc</span>
-<span class="sd">            metadata. **Note:** This stream must align exactly with ``texts`` or</span>
-<span class="sd">            ``docs``, or else metadata will be mis-assigned. More concretely,</span>
-<span class="sd">            the first item in ``metadatas`` will be assigned to the first item</span>
-<span class="sd">            in ``texts`` or ``docs``, and so on from there.</span>
+<span class="sd">            Pass a standard 2-letter language code (e.g. &quot;en&quot;),</span>
+<span class="sd">            or the name of a spacy language pipeline (e.g. &quot;en_core_web_md&quot;),</span>
+<span class="sd">            or an already-instantiated :class:`spacy.language.Language` object.</span>
+
+<span class="sd">            A given / detected language string is then used to instantiate</span>
+<span class="sd">            a corresponding ``Language`` with all default components enabled.</span>
+<span class="sd">        data (obj or Iterable[obj]): One or a stream of texts, records,</span>
+<span class="sd">            or :class:`spacy.tokens.Doc` s to be added to the corpus.</span>
+
+<span class="sd">            .. seealso:: :meth:`Corpus.add()`</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        lang (str): 2-letter code for language of documents in :class:`Corpus`.</span>
-<span class="sd">        n_docs (int): Number of documents in :class:`Corpus`.</span>
-<span class="sd">        n_tokens (int): Total number of tokens of all documents in :class:`Corpus`.</span>
-<span class="sd">        n_sents (int): Total number of sentences of all documents in :class:`Corpus`.</span>
-<span class="sd">            If the ``spacy.Language`` used to process documents did not include</span>
-<span class="sd">            a syntactic parser, upon which sentence segmentation relies, this</span>
-<span class="sd">            value will be null.</span>
-<span class="sd">        docs (List[:class:`Doc &lt;textacy.doc.Doc&gt;`]): List of documents in</span>
-<span class="sd">            :class:`Corpus`. In 99% of cases, you should never have to interact</span>
-<span class="sd">            directly with this list; instead, index and slice directly on</span>
-<span class="sd">            :class:`Corpus` or use the flexible :meth:`Corpus.get() &lt;Corpus.get&gt;`</span>
-<span class="sd">            and :meth:`Corpus.remove() &lt;Corpus.remove&gt;` methods.</span>
-<span class="sd">        spacy_lang (``spacy.Language``): http://spacy.io/docs/#english</span>
-<span class="sd">        spacy_vocab (``spacy.Vocab``): https://spacy.io/docs#vocab</span>
-<span class="sd">        spacy_stringstore (``spacy.StringStore``): https://spacy.io/docs#stringstore</span>
+<span class="sd">        lang (str)</span>
+<span class="sd">        spacy_lang (:class:`spacy.language.Language`)</span>
+<span class="sd">        docs (List[:class:`spacy.tokens.Doc`])</span>
+<span class="sd">        n_docs (int)</span>
+<span class="sd">        n_sents (int)</span>
+<span class="sd">        n_tokens (int)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">docs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">lang</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;`lang` must be </span><span class="si">{}</span><span class="s2">, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">SpacyLang</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lang</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">_get_spacy_lang</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">lang</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spacy_stringstore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="o">.</span><span class="n">strings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="c1"># sentence segmentation requires parse; if not available, skip it</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">has_pipe</span><span class="p">(</span><span class="s2">&quot;parser&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">pipe</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">DependencyParser</span><span class="p">)</span> <span class="k">for</span> <span class="n">pipe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">pipeline</span>
-        <span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">texts</span> <span class="ow">and</span> <span class="n">docs</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;Corpus may be initialized with either `texts` or `docs`, but not both.&quot;</span>
-            <span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_texts</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="n">metadatas</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">docs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">metadatas</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">doc</span><span class="p">,</span> <span class="n">metadata</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">zip_</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">metadatas</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">add_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">add_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+    <span class="c1"># dunder</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Corpus(</span><span class="si">{}</span><span class="s2"> docs; </span><span class="si">{}</span><span class="s2"> tokens)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;Corpus(</span><span class="si">{}</span><span class="s2"> docs, </span><span class="si">{}</span><span class="s2"> tokens)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span>
@@ -214,6 +186,9 @@
     <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx_or_slice</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">idx_or_slice</span><span class="p">]</span>
@@ -223,209 +198,173 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_one_doc_by_index</span><span class="p">(</span><span class="n">idx_or_slice</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx_or_slice</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="n">idx_or_slice</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span><span class="p">)</span>
-            <span class="n">indexes</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_many_docs_by_index</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span>
+            <span class="n">idxs</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">range_</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_many_docs_by_index</span><span class="p">(</span><span class="n">idxs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;value must be </span><span class="si">{}</span><span class="s1">, not &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">({</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">idx_or_slice</span><span class="p">))</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Constituent docs&#39; word vectors stacked together in a matrix.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">doc</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">vector</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">))</span>
-
-    <span class="c1">##########</span>
-    <span class="c1"># FILEIO #</span>
-
-<div class="viewcode-block" id="Corpus.save"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Save :class:`Corpus` documents&#39; content and metadata to disk,</span>
-<span class="sd">        as a ``pickle`` file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filepath (str): Full path to file on disk where documents&#39; content and</span>
-<span class="sd">                metadata are to be saved.</span>
-
-<span class="sd">        See Also:</span>
-<span class="sd">            :meth:`Corpus.load()`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># HACK: add spacy language metadata to first doc&#39;s user_data</span>
-        <span class="c1"># so we can re-instantiate the same language upon Corpus.load()</span>
-        <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;textacy&quot;</span><span class="p">][</span><span class="s2">&quot;spacy_lang_meta&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">meta</span>
-        <span class="n">io</span><span class="o">.</span><span class="n">write_spacy_docs</span><span class="p">((</span><span class="n">doc</span><span class="o">.</span><span class="n">spacy_doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">),</span> <span class="n">filepath</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Corpus.load"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.load">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load documents&#39; pickled content and metadata from disk, and initialize</span>
-<span class="sd">        a :class:`Corpus` with a spacy language pipeline equivalent to what was</span>
-<span class="sd">        in use previously, when the corpus was saved.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filepath (str): Full path to file on disk where documents&#39; content and</span>
-<span class="sd">                metadata are saved.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :class:`Corpus`</span>
-
-<span class="sd">        See Also:</span>
-<span class="sd">            :meth:`Corpus.save()`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">spacy_docs</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_spacy_docs</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-        <span class="c1"># HACK: pop spacy language metadata from first doc&#39;s user_data</span>
-        <span class="c1"># so we can (more or less...) re-instantiate the same language pipeline</span>
-        <span class="n">first_spacy_doc</span><span class="p">,</span> <span class="n">spacy_docs</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">spacy_docs</span><span class="p">)</span>
-        <span class="n">spacy_lang_meta</span> <span class="o">=</span> <span class="n">first_spacy_doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;textacy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;spacy_lang_meta&quot;</span><span class="p">)</span>
-        <span class="c1"># manually instantiate the spacy language pipeline and</span>
-        <span class="c1"># hope that the spacy folks either make this easier or don&#39;t touch it</span>
-        <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">get_lang_class</span><span class="p">(</span><span class="n">spacy_lang_meta</span><span class="p">[</span><span class="s2">&quot;lang&quot;</span><span class="p">])(</span>
-            <span class="n">vocab</span><span class="o">=</span><span class="n">first_spacy_doc</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">spacy_lang_meta</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">spacy_lang_meta</span><span class="p">[</span><span class="s2">&quot;pipeline&quot;</span><span class="p">]:</span>
-            <span class="n">spacy_lang</span><span class="o">.</span><span class="n">add_pipe</span><span class="p">(</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">create_pipe</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">spacy_lang</span><span class="p">,</span> <span class="n">docs</span><span class="o">=</span><span class="n">spacy_docs</span><span class="p">)</span></div>
-
-    <span class="c1">#################</span>
-    <span class="c1"># ADD DOCUMENTS #</span>
-
-    <span class="k">def</span> <span class="nf">_add_textacy_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
-        <span class="n">doc</span><span class="o">.</span><span class="n">corpus_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span>
-        <span class="n">doc</span><span class="o">.</span><span class="n">corpus</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span> <span class="o">+=</span> <span class="n">doc</span><span class="o">.</span><span class="n">n_tokens</span>
-        <span class="c1"># sentence segmentation requires parse; if not available, skip it</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">has_pipe</span><span class="p">(</span><span class="s2">&quot;parser&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">pipe</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">DependencyParser</span><span class="p">)</span> <span class="k">for</span> <span class="n">pipe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">pipeline</span>
-        <span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">+=</span> <span class="n">doc</span><span class="o">.</span><span class="n">n_sents</span>
-        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;added </span><span class="si">%s</span><span class="s2"> to Corpus[</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">doc</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">corpus_index</span><span class="p">)</span>
-
-<div class="viewcode-block" id="Corpus.add_texts"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_texts">[docs]</a>    <span class="k">def</span> <span class="nf">add_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">metadatas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process a stream of texts (and a corresponding stream of metadata dicts,</span>
-<span class="sd">        optionally) in parallel with spaCy; add as :class:`Doc &lt;textacy.doc.Doc&gt;` s</span>
-<span class="sd">        to the corpus.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            texts (Iterable[str]): Stream of texts to add to corpus as</span>
-<span class="sd">                :class:`Doc &lt;textacy.doc.Doc&gt;` s.</span>
-<span class="sd">            metadatas (Iterable[dict]): Stream of dictionaries of relevant</span>
-<span class="sd">                document metadata.</span>
-
-<span class="sd">                .. note:: This stream must align exactly with ``texts``, or</span>
-<span class="sd">                   metadata will be mis-assigned to texts. More concretely,</span>
-<span class="sd">                   the first item in ``metadatas`` will be assigned to</span>
-<span class="sd">                   the first item in ``texts``, and so on from there.</span>
-
-<span class="sd">            n_threads (int): Number of threads to use when processing ``texts``</span>
-<span class="sd">            in parallel, if available. DEPRECATED! This never worked correctly</span>
-<span class="sd">                in spacy v2.0, and no longer does in anything in spacy v2.1.</span>
-<span class="sd">            batch_size (int): Number of texts to process at a time.</span>
-
-<span class="sd">        See Also:</span>
-<span class="sd">            - :func:`io.split_records() &lt;textacy.io.utils.split_records&gt;`</span>
-<span class="sd">            - https://spacy.io/api/language#pipe</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">n_threads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">utils</span><span class="o">.</span><span class="n">deprecated</span><span class="p">(</span>
-                <span class="s2">&quot;The `n_threads` arg never worked correctly in spacy v2.0, and &quot;</span>
-                <span class="s2">&quot;doesn&#39;t do anything in spacy v2.1, so textacy won&#39;t pass it on.&quot;</span><span class="p">,</span>
-                <span class="n">action</span><span class="o">=</span><span class="s2">&quot;once&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;list indices must be integers or slices, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">idx_or_slice</span><span class="p">))</span>
             <span class="p">)</span>
-        <span class="n">spacy_docs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">metadatas</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">spacy_doc</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-                <span class="n">compat</span><span class="o">.</span><span class="n">zip_</span><span class="p">(</span><span class="n">spacy_docs</span><span class="p">,</span> <span class="n">metadatas</span><span class="p">)</span>
-            <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_add_textacy_doc</span><span class="p">(</span>
-                    <span class="n">Doc</span><span class="p">(</span><span class="n">spacy_doc</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">batch_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;adding texts to </span><span class="si">%s</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">spacy_doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spacy_docs</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_add_textacy_doc</span><span class="p">(</span>
-                    <span class="n">Doc</span><span class="p">(</span><span class="n">spacy_doc</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">batch_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;adding texts to </span><span class="si">%s</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Corpus.add_text"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_text">[docs]</a>    <span class="k">def</span> <span class="nf">add_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># add documents</span>
+
+<div class="viewcode-block" id="Corpus.add"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a :class:`Doc &lt;textacy.doc.Doc&gt;` from ``text`` and ``metadata``,</span>
-<span class="sd">        then add it to the corpus.</span>
+<span class="sd">        Add one or a stream of texts, records, or :class:`spacy.tokens.Doc` s</span>
+<span class="sd">        to the corpus, ensuring that all processing is or has already been done</span>
+<span class="sd">        by the :attr:`Corpus.spacy_lang` pipeline.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            text (str): Document (text) content to add to corpus as a</span>
-<span class="sd">                :class:`Doc &lt;textacy.doc.Doc&gt;`.</span>
-<span class="sd">            metadata (dict): Dictionary of relevant document metadata.</span>
+<span class="sd">            data (obj or Iterable[obj]):</span>
+<span class="sd">                str or Iterable[str]</span>
+<span class="sd">                Tuple[str, dict] or Iterable[Tuple[str, dict]]</span>
+<span class="sd">                :class:`spacy.tokens.Doc` or Iterable[:class:`spacy.tokens.Doc`]</span>
+<span class="sd">            batch_size (int)</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            * :meth:`Corpus.add_text()`</span>
+<span class="sd">            * :meth:`Corpus.add_texts()`</span>
+<span class="sd">            * :meth:`Corpus.add_record()`</span>
+<span class="sd">            * :meth:`Corpus.add_records()`</span>
+<span class="sd">            * :meth:`Corpus.add_doc()`</span>
+<span class="sd">            * :meth:`Corpus.add_docs()`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_textacy_doc</span><span class="p">(</span><span class="n">Doc</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="Corpus.add_doc"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add an existing :class:`Doc &lt;textacy.doc.Doc&gt;` or initialize a</span>
-<span class="sd">        new one from a ``spacy.Doc`` to the corpus.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            doc (:class:`Doc &lt;textacy.doc.Doc&gt;` or ``spacy.Doc``)</span>
-<span class="sd">            metadata (dict): Dictionary of relevant document metadata. Note:</span>
-<span class="sd">                If specified, this will *overwrite* any existing metadata.</span>
-
-<span class="sd">        Warning:</span>
-<span class="sd">            If ``doc`` was already added to this or another :class:`Corpus`,</span>
-<span class="sd">            it will be deep-copied and then added as if a new document. A warning</span>
-<span class="sd">            message will be logged. This is probably not a thing you should do.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">Doc</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">spacy_vocab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Doc.spacy_vocab </span><span class="si">{}</span><span class="s2"> != Corpus.spacy_vocab </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">doc</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_doc</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_record</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_record</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">first</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_texts</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_docs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_record</span><span class="p">(</span><span class="n">first</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_records</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;data must be one of </span><span class="si">{}</span><span class="s2"> or an interable thereof, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">},</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s2">&quot;corpus_index&quot;</span><span class="p">):</span>
-                <span class="n">doc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Doc already associated with a Corpus; adding anyway...&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">doc</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_textacy_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;SpacyDoc.vocab </span><span class="si">{}</span><span class="s2"> != Corpus.spacy_vocab </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_vocab</span>
-                <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="n">doc</span><span class="o">.</span><span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;textacy&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_textacy_doc</span><span class="p">(</span><span class="n">Doc</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;`doc` must be </span><span class="si">{}</span><span class="s1">, not &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">({</span><span class="n">Doc</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">doc</span><span class="p">))</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;data must be one of </span><span class="si">{}</span><span class="s2"> or an interable thereof, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">},</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
 
-    <span class="c1">#################</span>
-    <span class="c1"># GET DOCUMENTS #</span>
-
-<div class="viewcode-block" id="Corpus.get"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_func</span><span class="p">,</span> <span class="n">limit</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Corpus.add_text"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_text">[docs]</a>    <span class="k">def</span> <span class="nf">add_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Iterate over docs in :class:`Corpus` and return all (or N &lt;= ``limit``)</span>
-<span class="sd">        for which ``match_func(doc)`` is True.</span>
+<span class="sd">        Add one text to the corpus, processing it into a :class:`spacy.tokens.Doc`</span>
+<span class="sd">        using the :attr:`Corpus.spacy_lang` pipeline.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            match_func (func): Function that takes a :class:`Doc &lt;textacy.doc.Doc&gt;`</span>
+<span class="sd">            text (str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_valid_doc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="p">(</span><span class="n">text</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Corpus.add_texts"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_texts">[docs]</a>    <span class="k">def</span> <span class="nf">add_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a stream of texts to the corpus, efficiently processing them into</span>
+<span class="sd">        :class:`spacy.tokens.Doc` s using the :attr:`Corpus.spacy_lang` pipeline.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            texts (Iterable[str])</span>
+<span class="sd">            batch_size (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">as_tuples</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_valid_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Corpus.add_record"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_record">[docs]</a>    <span class="k">def</span> <span class="nf">add_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add one record to the corpus, processing it into a :class:`spacy.tokens.Doc`</span>
+<span class="sd">        using the :attr:`Corpus.spacy_lang` pipeline.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            record (Tuple[str, dict])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_valid_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Corpus.add_records"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_records">[docs]</a>    <span class="k">def</span> <span class="nf">add_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a stream of records to the corpus, efficiently processing them into</span>
+<span class="sd">        :class:`spacy.tokens.Doc` s using the :attr:`Corpus.spacy_lang` pipeline.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            records (Iterable[Tuple[str, dict]])</span>
+<span class="sd">            batch_size (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">doc</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">as_tuples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_valid_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Corpus.add_doc"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add one :class:`spacy.tokens.Doc` to the corpus, provided it was processed</span>
+<span class="sd">        using the :attr:`Corpus.spacy_lang` pipeline.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            doc (:class:`spacy.tokens.Doc`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;doc must be a </span><span class="si">{}</span><span class="s2">, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">doc</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;doc.vocab (</span><span class="si">{}</span><span class="s2">) must be the same as corpus.vocab (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_valid_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Corpus.add_docs"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.add_docs">[docs]</a>    <span class="k">def</span> <span class="nf">add_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a stream of :class:`spacy.tokens.Doc` s to the corpus, provided</span>
+<span class="sd">        they were processed using the :attr:`Corpus.spacy_lang` pipeline.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            doc (Iterable[:class:`spacy.tokens.Doc`])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_add_valid_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">doc</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">is_sentenced</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
+
+    <span class="c1"># get documents</span>
+
+<div class="viewcode-block" id="Corpus.get"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_func</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all (or N &lt;= ``limit``) docs in :class:`Corpus` for which</span>
+<span class="sd">        ``match_func(doc)`` is True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            match_func (Callable): Function that takes a :class:`spacy.tokens.Doc`</span>
 <span class="sd">                as input and returns a boolean value. For example::</span>
 
 <span class="sd">                    Corpus.get(lambda x: len(x) &gt;= 100)</span>
 
-<span class="sd">                gets all docs with 100+ tokens. And::</span>
+<span class="sd">                gets all docs with at least 100 tokens. And::</span>
 
-<span class="sd">                    Corpus.get(lambda x: x.metadata[&#39;author&#39;] == &#39;Burton DeWilde&#39;)</span>
+<span class="sd">                    Corpus.get(lambda doc: doc._.meta[&quot;author&quot;] == &quot;Burton DeWilde&quot;)</span>
 
 <span class="sd">                gets all docs whose author was given as &#39;Burton DeWilde&#39;.</span>
 <span class="sd">            limit (int): Maximum number of matched docs to return.</span>
 
 <span class="sd">        Yields:</span>
-<span class="sd">            :class:`Doc &lt;textacy.doc.Doc&gt;`: Next document passing</span>
-<span class="sd">            ``match_func`` up to ``limit`` docs.</span>
+<span class="sd">            :class:`spacy.tokens.Doc`: Next document passing ``match_func``.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            :meth:`Corpus.remove()`</span>
@@ -434,69 +373,29 @@
 <span class="sd">           Python&#39;s usual indexing and slicing: ``Corpus[0]`` gets the first</span>
 <span class="sd">           document in the corpus; ``Corpus[:5]`` gets the first 5; etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">n_matched_docs</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">match_func</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">doc</span>
-                <span class="n">n_matched_docs</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">n_matched_docs</span> <span class="o">==</span> <span class="n">limit</span><span class="p">:</span>
-                    <span class="k">break</span></div>
+        <span class="n">matched_docs</span> <span class="o">=</span> <span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">match_func</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">matched_docs</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">doc</span></div>
 
-    <span class="c1">###############</span>
-    <span class="c1"># REMOVE DOCS #</span>
+    <span class="c1"># remove documents</span>
 
-    <span class="k">def</span> <span class="nf">_remove_one_doc_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-        <span class="n">n_tokens_removed</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">n_tokens</span>
-        <span class="n">n_sents_removed</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">n_sents</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">parser</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="c1"># actually remove the doc</span>
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-        <span class="c1"># shift `corpus_index` attribute on docs higher up in the list</span>
-        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">:]:</span>
-            <span class="n">doc</span><span class="o">.</span><span class="n">corpus_index</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="c1"># decrement the corpus doc/token/sent counts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span> <span class="o">-=</span> <span class="n">n_tokens_removed</span>
-        <span class="k">if</span> <span class="n">n_sents_removed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">-=</span> <span class="n">n_sents_removed</span>
-
-    <span class="k">def</span> <span class="nf">_remove_many_docs_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexes</span><span class="p">):</span>
-        <span class="n">indexes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indexes</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">n_docs_removed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span>
-        <span class="n">n_sents_removed</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">n_tokens_removed</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
-            <span class="n">n_tokens_removed</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">n_tokens</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">parser</span><span class="p">:</span>
-                <span class="n">n_sents_removed</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">n_sents</span>
-            <span class="c1"># actually remove the doc</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-        <span class="c1"># shift the `corpus_index` attribute for all docs at once</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">doc</span><span class="o">.</span><span class="n">corpus_index</span> <span class="o">=</span> <span class="n">i</span>
-        <span class="c1"># decrement the corpus doc/sent/token counts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span> <span class="o">-=</span> <span class="n">n_docs_removed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span> <span class="o">-=</span> <span class="n">n_tokens_removed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">-=</span> <span class="n">n_sents_removed</span>
-
-<div class="viewcode-block" id="Corpus.remove"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_func</span><span class="p">,</span> <span class="n">limit</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="Corpus.remove"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_func</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove all (or N &lt;= ``limit``) docs in :class:`Corpus` for which</span>
 <span class="sd">        ``match_func(doc)`` is True. Corpus doc/sent/token counts are adjusted</span>
-<span class="sd">        accordingly, as are the :attr:`Doc.corpus_index &lt;textacy.doc.Doc.corpus_index&gt;`</span>
-<span class="sd">        attributes on affected documents.</span>
+<span class="sd">        accordingly.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            match_func (func): Function that takes a :class:`Doc &lt;textacy.doc.Doc&gt;`</span>
+<span class="sd">            match_func (func): Function that takes a :class:`spacy.tokens.Doc`</span>
 <span class="sd">                and returns a boolean value. For example::</span>
 
 <span class="sd">                    Corpus.remove(lambda x: len(x) &gt;= 100)</span>
 
-<span class="sd">                removes docs with 100+ tokens. And::</span>
+<span class="sd">                removes docs with at least 100 tokens. And::</span>
 
-<span class="sd">                    Corpus.remove(lambda x: x.metadata[&#39;author&#39;] == &#39;Burton DeWilde&#39;)</span>
+<span class="sd">                    Corpus.remove(lambda doc: doc._.meta[&quot;author&quot;] == &quot;Burton DeWilde&quot;)</span>
 
-<span class="sd">                removes docs whose author was given as &#39;Burton DeWilde&#39;.</span>
+<span class="sd">                removes docs whose author was given as &quot;Burton DeWilde&quot;.</span>
 <span class="sd">            limit (int): Maximum number of matched docs to remove.</span>
 
 <span class="sd">        See Also:</span>
@@ -507,36 +406,59 @@
 <span class="sd">           first document in the corpus; ``del Corpus[:5]`` removes the first</span>
 <span class="sd">           5; etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">n_matched_docs</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">matched_indexes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">match_func</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">matched_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="n">n_matched_docs</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">n_matched_docs</span> <span class="o">==</span> <span class="n">limit</span><span class="p">:</span>
-                    <span class="k">break</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_many_docs_by_index</span><span class="p">(</span><span class="n">matched_indexes</span><span class="p">)</span></div>
+        <span class="n">matched_docs</span> <span class="o">=</span> <span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">match_func</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">matched_docs</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_one_doc_by_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">doc</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="Corpus.word_freqs"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.word_freqs">[docs]</a>    <span class="k">def</span> <span class="nf">word_freqs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_remove_one_doc_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span> <span class="o">-=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">is_sentenced</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">-=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_remove_many_docs_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_one_doc_by_index</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="c1"># useful properties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constituent docs&#39; word vectors stacked in a 2d array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">doc</span><span class="o">.</span><span class="n">vector</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vector_norms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constituent docs&#39; L2-normalized word vectors stacked in a 2d array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">doc</span><span class="o">.</span><span class="n">vector_norm</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">))</span>
+
+    <span class="c1"># useful methods</span>
+
+<div class="viewcode-block" id="Corpus.word_counts"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.word_counts">[docs]</a>    <span class="k">def</span> <span class="nf">word_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Map the set of unique words in :class:`Corpus` to their counts as absolute,</span>
-<span class="sd">        relative, or binary frequencies of occurence. This is akin to</span>
-<span class="sd">        :func:`Doc.to_bag_of_words() &lt;textacy.doc.Doc.to_bag_of_words&gt;`.</span>
+<span class="sd">        Map the set of unique words in :class:`Corpus` to their counts as</span>
+<span class="sd">        absolute, relative, or binary frequencies of occurence,</span>
+<span class="sd">        similar to :meth:`Doc._.to_bag_of_words()` but aggregated over all docs.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            normalize (str): if &#39;lemma&#39;, lemmatize words before counting; if</span>
-<span class="sd">                &#39;lower&#39;, lowercase words before counting; otherwise, words are</span>
-<span class="sd">                counted using the form with which they they appear in docs</span>
-<span class="sd">            weighting ({&#39;count&#39;, &#39;freq&#39;, &#39;binary&#39;}): Type of weight to assign to</span>
-<span class="sd">                words. If &#39;count&#39; (default), weights are the absolute number of</span>
-<span class="sd">                occurrences (count) of word in corpus. If &#39;binary&#39;, all counts</span>
-<span class="sd">                are set equal to 1. If &#39;freq&#39;, word counts are normalized by the</span>
-<span class="sd">                total token count, giving their relative frequency of occurrence.</span>
-<span class="sd">                Note: The resulting set of frequencies won&#39;t (necessarily) sum</span>
-<span class="sd">                to 1.0, since punctuation and stop words are filtered out after</span>
-<span class="sd">                counts are normalized.</span>
-<span class="sd">            as_strings (bool): if True, words are returned as strings; if False</span>
-<span class="sd">                (default), words are returned as their unique integer ids</span>
+<span class="sd">            normalize (str): If &quot;lemma&quot;, lemmatize words before counting; if</span>
+<span class="sd">                &quot;lower&quot;, lowercase words before counting; otherwise, words are</span>
+<span class="sd">                counted using the form with which they appear.</span>
+<span class="sd">            weighting ({&quot;count&quot;, &quot;freq&quot;}): Type of weight to assign to words.</span>
+<span class="sd">                If &quot;count&quot; (default), weights are the absolute number of</span>
+<span class="sd">                occurrences (count) of word in corpus.</span>
+<span class="sd">                If &quot;freq&quot;, word counts are normalized by the total token count,</span>
+<span class="sd">                giving their relative frequencies of occurrence.</span>
+
+<span class="sd">                .. note:: The resulting set of frequencies won&#39;t (necessarily) sum</span>
+<span class="sd">                   to 1.0, since punctuation and stop words are filtered out after</span>
+<span class="sd">                   counts are normalized.</span>
+
+<span class="sd">            as_strings (bool): If True, words are returned as strings; if False</span>
+<span class="sd">                (default), words are returned as their unique integer ids.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: mapping of a unique word id or string (depending on the value</span>
@@ -544,27 +466,31 @@
 <span class="sd">            of occurrence (depending on the value of ``weighting``).</span>
 
 <span class="sd">        See Also:</span>
-<span class="sd">            :func:`vsm.get_term_freqs() &lt;textacy.vsm.get_term_freqs&gt;``</span>
+<span class="sd">            :func:`textacy.vsm.get_term_freqs()`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">word_counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+        <span class="n">word_counts_</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="n">word_counts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                <span class="n">doc</span><span class="o">.</span><span class="n">to_bag_of_words</span><span class="p">(</span>
+            <span class="n">word_counts_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">to_bag_of_words</span><span class="p">(</span>
                     <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="n">as_strings</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
-            <span class="n">word_counts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">word_counts</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;freq&quot;</span><span class="p">:</span>
+            <span class="n">word_counts_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">word_counts_</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;freq&quot;</span><span class="p">:</span>
             <span class="n">n_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_tokens</span>
-            <span class="n">word_counts</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">word</span><span class="p">:</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">n_tokens</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">word_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">word_counts_</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">word</span><span class="p">:</span> <span class="n">count</span> <span class="o">/</span> <span class="n">n_tokens</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_counts_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">}</span>
-        <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span><span class="p">:</span>
-            <span class="n">word_counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">word</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">word_counts</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
-        <span class="k">return</span> <span class="n">word_counts</span></div>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;weighting=&#39;</span><span class="si">{}</span><span class="s2">&#39; is invalid; valid values are </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">weighting</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;freq&quot;</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">word_counts_</span></div>
 
-<div class="viewcode-block" id="Corpus.word_doc_freqs"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.word_doc_freqs">[docs]</a>    <span class="k">def</span> <span class="nf">word_doc_freqs</span><span class="p">(</span>
+<div class="viewcode-block" id="Corpus.word_doc_counts"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.word_doc_counts">[docs]</a>    <span class="k">def</span> <span class="nf">word_doc_counts</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="n">smooth_idf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -572,21 +498,20 @@
 <span class="sd">        as absolute, relative, inverse, or binary frequencies of occurence.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            normalize (str): if &#39;lemma&#39;, lemmatize words before counting; if</span>
-<span class="sd">                &#39;lower&#39;, lowercase words before counting; otherwise, words are</span>
-<span class="sd">                counted using the form with which they they appear in docs</span>
-<span class="sd">            weighting ({&#39;count&#39;, &#39;freq&#39;, &#39;idf&#39;, &#39;binary&#39;}): Type of weight to</span>
-<span class="sd">                assign to words. If &#39;count&#39; (default), weights are the absolute</span>
-<span class="sd">                number (count) of documents in which word appears. If &#39;binary&#39;,</span>
-<span class="sd">                all counts are set equal to 1. If &#39;freq&#39;, word doc counts are</span>
-<span class="sd">                normalized by the total document count, giving their relative</span>
-<span class="sd">                frequency of occurrence. If &#39;idf&#39;, weights are the log of the</span>
+<span class="sd">            normalize (str): If &quot;lemma&quot;, lemmatize words before counting; if</span>
+<span class="sd">                &quot;lower&quot;, lowercase words before counting; otherwise, words are</span>
+<span class="sd">                counted using the form with which they appear.</span>
+<span class="sd">            weighting ({&quot;count&quot;, &quot;freq&quot;, &quot;idf&quot;}): Type of weight to assign to words.</span>
+<span class="sd">                If &quot;count&quot; (default), weights are the absolute number (count)</span>
+<span class="sd">                of documents in which word appears. If &quot;freq&quot;, word doc counts</span>
+<span class="sd">                are normalized by the total document count, giving their relative</span>
+<span class="sd">                frequencies of occurrence. If &quot;idf&quot;, weights are the log of the</span>
 <span class="sd">                inverse relative frequencies: ``log(n_docs / word_doc_count)``</span>
-<span class="sd">                or ``log(1 + n_docs / word_doc_count)`` if ``smooth_idf`` is True.</span>
-<span class="sd">            smooth_idf (bool): if True, add 1 to all document frequencies when</span>
-<span class="sd">                calculating &#39;idf&#39; weighting, equivalent to adding a single</span>
-<span class="sd">                document to the corpus containing every unique word</span>
-<span class="sd">            as_strings (bool): if True, words are returned as strings; if False</span>
+<span class="sd">                or (if ``smooth_idf`` is True) ``log(1 + (n_docs / word_doc_count))`` .</span>
+<span class="sd">            smooth_idf (bool): If True, add 1 to all word doc counts when</span>
+<span class="sd">                calculating &quot;idf&quot; weighting, equivalent to adding a single</span>
+<span class="sd">                document to the corpus containing every unique word.</span>
+<span class="sd">            as_strings (bool): If True, words are returned as strings; if False</span>
 <span class="sd">                (default), words are returned as their unique integer ids</span>
 
 <span class="sd">        Returns:</span>
@@ -596,37 +521,150 @@
 <span class="sd">            on the value of ``weighting``).</span>
 
 <span class="sd">        See Also:</span>
-<span class="sd">            :func:`vsm.get_doc_freqs() &lt;textacy.vsm.matrix_utils.get_doc_freqs&gt;`</span>
+<span class="sd">            :func:`textacy.vsm.get_doc_freqs()`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">word_doc_counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+        <span class="n">word_doc_counts_</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="n">word_doc_counts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                <span class="n">doc</span><span class="o">.</span><span class="n">to_bag_of_words</span><span class="p">(</span>
+            <span class="n">word_doc_counts_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">to_bag_of_words</span><span class="p">(</span>
                     <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="n">as_strings</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
-            <span class="n">word_doc_counts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">word_doc_counts</span><span class="p">)</span>
+            <span class="n">word_doc_counts_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">word_doc_counts_</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;freq&quot;</span><span class="p">:</span>
             <span class="n">n_docs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span>
-            <span class="n">word_doc_counts</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">word</span><span class="p">:</span> <span class="n">count</span> <span class="o">/</span> <span class="n">n_docs</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_doc_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">word_doc_counts_</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">word</span><span class="p">:</span> <span class="n">count</span> <span class="o">/</span> <span class="n">n_docs</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_doc_counts_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">}</span>
         <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;idf&quot;</span><span class="p">:</span>
             <span class="n">n_docs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_docs</span>
             <span class="k">if</span> <span class="n">smooth_idf</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">word_doc_counts</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="n">word</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">n_docs</span> <span class="o">/</span> <span class="n">count</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_doc_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="n">word_doc_counts_</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">word</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">n_docs</span> <span class="o">/</span> <span class="n">count</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_doc_counts_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">word_doc_counts</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">word_doc_counts_</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">word</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n_docs</span> <span class="o">/</span> <span class="n">count</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_doc_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">word_doc_counts_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">}</span>
-        <span class="k">elif</span> <span class="n">weighting</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span><span class="p">:</span>
-            <span class="n">word_doc_counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">word</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">word_doc_counts</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
-        <span class="k">return</span> <span class="n">word_doc_counts</span></div></div>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;weighting=&#39;</span><span class="si">{}</span><span class="s2">&#39; is invalid; valid values are </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">weighting</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="s2">&quot;idf&quot;</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">word_doc_counts_</span></div>
+
+    <span class="c1"># file io</span>
+
+<div class="viewcode-block" id="Corpus.save"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save :class:`Corpus` to disk as binary data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): Full path to file on disk where :class:`Corpus` data</span>
+<span class="sd">                will be saved as a binary file.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`Corpus.load()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">ORTH</span><span class="p">,</span>
+            <span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">SPACY</span><span class="p">,</span>
+            <span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">LEMMA</span><span class="p">,</span>
+            <span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">ENT_IOB</span><span class="p">,</span>
+            <span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">ENT_TYPE</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_tagged</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">TAG</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_parsed</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">HEAD</span><span class="p">)</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">DEP</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spacy</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">SENT_START</span><span class="p">)</span>
+
+        <span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">strings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">user_datas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">to_array</span><span class="p">(</span><span class="n">attrs</span><span class="p">))</span>
+            <span class="n">lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">))</span>
+            <span class="n">strings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tok</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">)</span>
+            <span class="n">user_datas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">user_data</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span>
+            <span class="s2">&quot;attrs&quot;</span><span class="p">:</span> <span class="n">attrs</span><span class="p">,</span>
+            <span class="s2">&quot;tokens&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;strings&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">strings</span><span class="p">),</span>
+            <span class="s2">&quot;user_datas&quot;</span><span class="p">:</span> <span class="n">user_datas</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">with</span> <span class="n">tio</span><span class="o">.</span><span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">srsly</span><span class="o">.</span><span class="n">msgpack_dumps</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Corpus.load"><a class="viewcode-back" href="../../api_reference.html#textacy.corpus.Corpus.load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lang</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load previously saved :class:`Corpus` binary data, reproduce the original</span>
+<span class="sd">        `:class:`spacy.tokens.Doc`s tokens and annotations, and instantiate</span>
+<span class="sd">        a new :class:`Corpus` from them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lang (str or :class:`spacy.language.Language`)</span>
+<span class="sd">            filepath (str): Full path to file on disk where :class:`Corpus` data</span>
+<span class="sd">                was previously saved as a binary file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`Corpus`</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`Corpus.save()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">_get_spacy_lang</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tio</span><span class="o">.</span><span class="n">open_sesame</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">srsly</span><span class="o">.</span><span class="n">msgpack_loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">spacy_lang</span><span class="o">.</span><span class="n">meta</span> <span class="o">!=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;meta&quot;</span><span class="p">]:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;the spacy langs are different!&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;strings&quot;</span><span class="p">]:</span>
+            <span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">[</span><span class="n">string</span><span class="p">]</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;attrs&quot;</span><span class="p">]</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+        <span class="n">flat_tokens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint64&quot;</span><span class="p">)</span>
+        <span class="n">flat_tokens</span> <span class="o">=</span> <span class="n">flat_tokens</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">flat_tokens</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">attrs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">attrs</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">NumpyOps</span><span class="p">()</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="n">flat_tokens</span><span class="p">,</span> <span class="n">lengths</span><span class="p">))</span>
+        <span class="n">user_datas</span> <span class="o">=</span> <span class="n">msg</span><span class="p">[</span><span class="s2">&quot;user_datas&quot;</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">_make_spacy_docs</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">user_datas</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">toks</span><span class="p">,</span> <span class="n">user_data</span> <span class="ow">in</span> <span class="n">compat</span><span class="o">.</span><span class="n">zip_</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">user_datas</span><span class="p">):</span>
+                <span class="n">doc</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">Doc</span><span class="p">(</span>
+                    <span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span><span class="p">,</span>
+                    <span class="n">words</span><span class="o">=</span><span class="p">[</span><span class="n">spacy_lang</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">strings</span><span class="p">[</span><span class="n">orth</span><span class="p">]</span> <span class="k">for</span> <span class="n">orth</span> <span class="ow">in</span> <span class="n">toks</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="n">spaces</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">toks</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="n">doc</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">toks</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:])</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">user_data</span> <span class="o">=</span> <span class="n">user_data</span>
+                <span class="k">yield</span> <span class="n">doc</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">spacy_lang</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">_make_spacy_docs</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">user_datas</span><span class="p">))</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_get_spacy_lang</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_spacy_lang</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">language</span><span class="o">.</span><span class="n">Language</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">lang</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;`lang` must be </span><span class="si">{}</span><span class="s2">, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">,</span> <span class="n">spacy</span><span class="o">.</span><span class="n">language</span><span class="o">.</span><span class="n">Language</span><span class="p">},</span> <span class="nb">type</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 </pre></div>
 
           </div>
@@ -682,8 +720,6 @@
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -696,7 +732,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

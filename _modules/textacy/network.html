@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.network &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -41,18 +39,19 @@
 <span class="sd">whole sentences and edges are weighted by the strength of their co-occurrence or</span>
 <span class="sd">similarity, respectively.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
-<span class="kn">from</span> <span class="nn">spacy.tokens.span</span> <span class="k">import</span> <span class="n">Span</span> <span class="k">as</span> <span class="n">SpacySpan</span>
-<span class="kn">from</span> <span class="nn">spacy.tokens.token</span> <span class="k">import</span> <span class="n">Token</span> <span class="k">as</span> <span class="n">SpacyToken</span>
+<span class="kn">from</span> <span class="nn">spacy.tokens</span> <span class="k">import</span> <span class="n">Span</span><span class="p">,</span> <span class="n">Token</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">vsm</span>
+<span class="c1"># from . import vsm  # we&#39;re hiding this import within a function</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -66,14 +65,14 @@
 <span class="sd">    other terms that co-occur within ``window_width`` terms of itself.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        terms (List[str] or List[``spacy.Token``])</span>
+<span class="sd">        terms (List[str] or List[:class:`spacy.tokens.Token`])</span>
 <span class="sd">        normalize (str or Callable): If &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
 <span class="sd">            lowercase terms; if false-y, use the form of terms as they appear</span>
-<span class="sd">            in ``terms``; if a callable, must accept a ``spacy.Token`` and return</span>
+<span class="sd">            in ``terms``; if a callable, must accept a ``Token`` and return</span>
 <span class="sd">            a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`.</span>
 
 <span class="sd">            .. note:: This is applied to the elements of ``terms`` *only* if</span>
-<span class="sd">               it&#39;s a list of ``spacy.Token``.</span>
+<span class="sd">               it&#39;s a list of ``Token``.</span>
 
 <span class="sd">        window_width (int): Size of sliding window over ``terms`` that determines</span>
 <span class="sd">            which are said to co-occur. If 2, only immediately adjacent terms</span>
@@ -119,7 +118,7 @@
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">terms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
         <span class="n">windows</span> <span class="o">=</span> <span class="n">itertoolz</span><span class="o">.</span><span class="n">sliding_window</span><span class="p">(</span><span class="n">window_width</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">terms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SpacyToken</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">terms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Token</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s2">&quot;lemma&quot;</span><span class="p">:</span>
             <span class="n">windows</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">tok</span><span class="o">.</span><span class="n">lemma_</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">window</span><span class="p">)</span>
@@ -174,14 +173,14 @@
 <span class="sd">    the (cosine or jaccard) similarity of their constituent words.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        sents (List[str] or List[``spacy.Span``])</span>
+<span class="sd">        sents (List[str] or List[:class:`spacy.tokens.Span`])</span>
 <span class="sd">        normalize (str or Callable): If &#39;lemma&#39;, lemmatize words in sents;</span>
 <span class="sd">            if &#39;lower&#39;, lowercase word in sents; if false-y, use the form of words</span>
-<span class="sd">            as they appear in sents; if a callable, must accept a ``spacy.Token``</span>
+<span class="sd">            as they appear in sents; if a callable, must accept a :class:`spacy.tokens.Token` .</span>
 <span class="sd">            and return a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`.</span>
 
 <span class="sd">            .. note:: This is applied to the elements of ``sents`` *only* if</span>
-<span class="sd">               it&#39;s a list of ``spacy.Span``.</span>
+<span class="sd">               it&#39;s a list of ``Span`` s.</span>
 
 <span class="sd">        edge_weighting ({&#39;cosine&#39;, &#39;jaccard&#39;}): Similarity metric to use for</span>
 <span class="sd">            weighting edges between sentences. If &#39;cosine&#39;, use the cosine</span>
@@ -200,9 +199,11 @@
 <span class="sd">        - Consider normalizing the strings so that like terms are counted together</span>
 <span class="sd">          (see :func:`textacy.spacier.utils.get_normalized_text()`)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">vsm</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
         <span class="k">pass</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SpacySpan</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Span</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">normalize</span> <span class="o">==</span> <span class="s2">&quot;lemma&quot;</span><span class="p">:</span>
             <span class="n">sents</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">(</span>
@@ -324,8 +325,6 @@
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -338,7 +337,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

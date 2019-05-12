@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy: NLP, before and after spaCy &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -47,28 +45,28 @@ and follow after.</p>
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Provide a convenient entry point and interface to one or many documents, with
-the core processing delegated to spaCy</li>
-<li>Stream text, json, csv, spaCy binary, and other data to and from disk</li>
-<li>Download and explore a variety of included datasets with both text content and
-metadata, from Congressional speeches to historical literature to Reddit comments</li>
-<li>Clean and normalize raw text, before analyzing it</li>
-<li>Access and filter basic linguistic elements, such as words, ngrams, and noun
-chunks; extract named entities, acronyms and their definitions, and key terms</li>
-<li>Flexibly tokenize and vectorize documents and corpora, then train, interpret,
-and visualize topic models using LSA, LDA, or NMF methods</li>
-<li>Compare strings, sets, and documents by a variety of similarity metrics</li>
-<li>Calculate common text statistics, including Flesch-Kincaid Grade Level,
-SMOG Index, and multilingual Flesch Reading Ease</li>
+<li><p>Provide a convenient entry point and interface to one or many documents, with
+the core processing delegated to spaCy</p></li>
+<li><p>Stream text, json, csv, spaCy binary, and other data to and from disk</p></li>
+<li><p>Download and explore a variety of included datasets with both text content and
+metadata, from Congressional speeches to historical literature to Reddit comments</p></li>
+<li><p>Clean and normalize raw text, before analyzing it</p></li>
+<li><p>Access and filter basic linguistic elements, such as words, ngrams, and noun
+chunks; extract named entities, acronyms and their definitions, and key terms</p></li>
+<li><p>Flexibly tokenize and vectorize documents and corpora, then train, interpret,
+and visualize topic models using LSA, LDA, or NMF methods</p></li>
+<li><p>Compare strings, sets, and documents by a variety of similarity metrics</p></li>
+<li><p>Calculate common text statistics, including Flesch-Kincaid Grade Level,
+SMOG Index, and multilingual Flesch Reading Ease</p></li>
 </ul>
 <p>… <em>and more!</em></p>
 </div>
 <div class="section" id="links">
 <h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>PyPi project: <a class="reference external" href="https://pypi.org/project/textacy">https://pypi.org/project/textacy</a></li>
-<li>Source code: <a class="reference external" href="https://github.com/chartbeat-labs/textacy">https://github.com/chartbeat-labs/textacy</a></li>
-<li>Documentation: <a class="reference external" href="https://chartbeat-labs.github.io/textacy">https://chartbeat-labs.github.io/textacy</a></li>
+<li><p>PyPi project: <a class="reference external" href="https://pypi.org/project/textacy">https://pypi.org/project/textacy</a></p></li>
+<li><p>Source code: <a class="reference external" href="https://github.com/chartbeat-labs/textacy">https://github.com/chartbeat-labs/textacy</a></p></li>
+<li><p>Documentation: <a class="reference external" href="https://chartbeat-labs.github.io/textacy">https://chartbeat-labs.github.io/textacy</a></p></li>
 </ul>
 <p><strong>Note:</strong> Docs used to be hosted on ReadTheDocs, but the builds stopped working
 many months ago, and now those docs are out-of-date. This is unfortunate, especially
@@ -80,7 +78,7 @@ switch the docs back.</p>
 <h2>Maintainer<a class="headerlink" href="#maintainer" title="Permalink to this headline">¶</a></h2>
 <p>Howdy, y’all. 👋</p>
 <ul class="simple">
-<li>Burton DeWilde (&lt;<a class="reference external" href="mailto:burton&#37;&#52;&#48;chartbeat&#46;com">burton<span>&#64;</span>chartbeat<span>&#46;</span>com</a>&gt;)</li>
+<li><p>Burton DeWilde (&lt;<a class="reference external" href="mailto:burton&#37;&#52;&#48;chartbeat&#46;com">burton<span>&#64;</span>chartbeat<span>&#46;</span>com</a>&gt;)</p></li>
 </ul>
 <div class="toctree-wrapper compound">
 <ul>
@@ -100,17 +98,15 @@ switch the docs back.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.doc">Doc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.corpus">Corpus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.datasets.capitol_words">Datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.preprocess">Text Preprocessing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.extract">Information Extraction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.vsm.vectorizers">Vectorization &amp; Topic Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.spacier.doc_extensions">spacier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.datasets.capitol_words">datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.preprocess">text preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.extract">information extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.vsm.vectorizers">vectorization &amp; topic modeling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.io.utils">IO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.viz.termite">Visualization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.cache">Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.network">Miscellany</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.spacier.components">Spacier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.viz.termite">visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.cache">utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference.html#module-textacy.network">miscellany</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
@@ -200,8 +196,6 @@ switch the docs back.</p>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -214,7 +208,7 @@ switch the docs back.</p>
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

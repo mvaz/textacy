@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.text_stats &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -44,8 +42,6 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
 
-<span class="kn">from</span> <span class="nn">spacy.tokens</span> <span class="k">import</span> <span class="n">Doc</span> <span class="k">as</span> <span class="n">SpacyDoc</span>
-
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">cache</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
@@ -59,7 +55,7 @@
 <span class="sd">    document. For example::</span>
 
 <span class="sd">        &gt;&gt;&gt; text = next(textacy.datasets.CapitolWords().texts(limit=1))</span>
-<span class="sd">        &gt;&gt;&gt; doc = textacy.Doc(text)</span>
+<span class="sd">        &gt;&gt;&gt; doc = textacy.make_spacy_doc(text)</span>
 <span class="sd">        &gt;&gt;&gt; ts = TextStats(doc)</span>
 <span class="sd">        &gt;&gt;&gt; ts.n_words</span>
 <span class="sd">        136</span>
@@ -86,7 +82,7 @@
 <span class="sd">         &#39;wiener_sachtextformel&#39;: 8.266410784313727}</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        doc (:class:`textacy.Doc` or :class:`SpacyDoc`): A text document processed</span>
+<span class="sd">        doc (:class:`spacy.tokens.Doc`): A text document processed</span>
 <span class="sd">            by spacy. Need only be tokenized.</span>
 
 <span class="sd">    Attributes:</span>
@@ -119,16 +115,12 @@
 <span class="sd">            above between ``flesch_kincaid_grade_level`` and ``wiener_sachtextformel``.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: If ``doc`` is not a :class:`textacy.Doc` or :class:`SpacyDoc`.</span>
+<span class="sd">        ValueError: If ``doc`` is not a :class:`spacy.tokens.Doc`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">SpacyDoc</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">lang</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">lang</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">n_sents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lang</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">lang</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
         <span class="c1"># get objs for basic count computations</span>
         <span class="n">hyphenator</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">load_hyphenator</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lang</span><span class="p">)</span>
         <span class="n">words</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
@@ -457,8 +449,6 @@
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -471,7 +461,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

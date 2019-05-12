@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>textacy.datasets.utils &#8212; textacy 0.6.3 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for textacy.datasets.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dataset Utils</span>
+<span class="sd">-------------</span>
+
+<span class="sd">Shared functionality for downloading, naming, and extracting the contents</span>
+<span class="sd">of datasets, as well as filtering for particular subsets.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">tarfile</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">..io</span> <span class="k">import</span> <span class="n">write_http_stream</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="download_file"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.download_file">[docs]</a><span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dirpath</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_DATA_DIR</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download a file from ``url`` and save it to disk.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): Web address from which to download data.</span>
+<span class="sd">        filename (str): Name of the file to which downloaded data is saved.</span>
+<span class="sd">            If None, a filename will be inferred from the ``url``.</span>
+<span class="sd">        dirpath (str): Full path to the directory on disk under which</span>
+<span class="sd">            downloaded data will be saved as ``filename``.</span>
+<span class="sd">        force (bool): If True, download the data even if it already exists at</span>
+<span class="sd">            ``dirpath/filename``; otherwise, only download if the data doesn&#39;t</span>
+<span class="sd">            already exist on disk.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">get_filename_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">force</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39; already exists and force=False; skipping download...&quot;</span><span class="p">,</span>
+            <span class="n">filepath</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">write_http_stream</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wb&quot;</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filepath</span></div>
+
+
+<div class="viewcode-block" id="get_filename_from_url"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.get_filename_from_url">[docs]</a><span class="k">def</span> <span class="nf">get_filename_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derive a filename from a URL&#39;s path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): URL from which to extract a filename.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Filename in URL.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">url_unquote_plus</span><span class="p">(</span><span class="n">url</span><span class="p">))</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="unpack_archive"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.unpack_archive">[docs]</a><span class="k">def</span> <span class="nf">unpack_archive</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">extract_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract data from a zip or tar archive file into a directory</span>
+<span class="sd">    (or do nothing if the file isn&#39;t an archive).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath (str): Full path to file on disk from which</span>
+<span class="sd">            archived contents will be extracted.</span>
+<span class="sd">        extract_dir (str): Path of the directory into which contents</span>
+<span class="sd">            will be extracted. If not provided, the same directory</span>
+<span class="sd">            as ``filepath`` is used.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to directory of extracted contents.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: shutil.unpack_archive() when PY3-only</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">extract_dir</span><span class="p">:</span>
+        <span class="n">extract_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="c1"># TODO: os.makedirs(path, exist_ok=True) when PY3-only</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">)</span>
+    <span class="n">is_zipfile</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">is_zipfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">is_tarfile</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">is_tarfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_zipfile</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_tarfile</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39; is not an archive&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">extract_dir</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_zipfile</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;extracting data from zip archive &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zf</span><span class="p">:</span>
+                <span class="c1"># zf.extractall(path=extract_dir)</span>
+                <span class="n">members</span> <span class="o">=</span> <span class="n">zf</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span>
+                <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="n">members</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">))</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">members</span><span class="p">:</span>
+                        <span class="n">zf</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">)</span>
+                        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">is_tarfile</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;extracting data from tar archive &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf</span><span class="p">:</span>
+                <span class="c1"># tf.extractall(path=extract_dir)</span>
+                <span class="n">members</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">getnames</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="n">members</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">)):</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">)</span>
+        <span class="n">src_basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonpath</span><span class="p">(</span><span class="n">members</span><span class="p">)</span>
+        <span class="n">dest_basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">tmp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dest_basename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tmp</span> <span class="o">==</span> <span class="n">dest_basename</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dest_basename</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="k">if</span> <span class="n">src_basename</span> <span class="o">!=</span> <span class="n">dest_basename</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="n">src_basename</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="n">dest_basename</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="n">src_basename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_collection"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.to_collection">[docs]</a><span class="k">def</span> <span class="nf">to_collection</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val_type</span><span class="p">,</span> <span class="n">col_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate and cast a filter value to a collection of filter values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        val (object)</span>
+<span class="sd">        val_type (type)</span>
+<span class="sd">        col_type (type)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        object: collection of type ``col_type`` with values all of type ``val_type``</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val_type</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">col_type</span><span class="p">([</span><span class="n">val</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">val_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;not all values are of type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val_type</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">col_type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;values must be </span><span class="si">{}</span><span class="s2"> or a collection thereof, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">val_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="validate_set_member_filter"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.validate_set_member_filter">[docs]</a><span class="k">def</span> <span class="nf">validate_set_member_filter</span><span class="p">(</span><span class="n">filter_vals</span><span class="p">,</span> <span class="n">vals_type</span><span class="p">,</span> <span class="n">valid_vals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate filter values that must be of a certain type or</span>
+<span class="sd">    found among a set of known values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filter_vals (obj or Set[obj]): Value or values to filter records by.</span>
+<span class="sd">        vals_type (type or Tuple[type]): Type(s) of which all ``filter_vals``</span>
+<span class="sd">            must be instances.</span>
+<span class="sd">        valid_vals (Set[obj]): Set of valid values in which all ``filter_vals``</span>
+<span class="sd">            must be found.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        Set[obj]: Validated and standardized filter values.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError</span>
+<span class="sd">        ValueError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filter_vals</span> <span class="o">=</span> <span class="n">to_collection</span><span class="p">(</span><span class="n">filter_vals</span><span class="p">,</span> <span class="n">vals_type</span><span class="p">,</span> <span class="nb">set</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">valid_vals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">filter_val</span> <span class="ow">in</span> <span class="n">valid_vals</span> <span class="k">for</span> <span class="n">filter_val</span> <span class="ow">in</span> <span class="n">filter_vals</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;not all values in filter are valid: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">filter_vals</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">valid_vals</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">filter_vals</span></div>
+
+
+<div class="viewcode-block" id="validate_and_clip_range_filter"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.validate_and_clip_range_filter">[docs]</a><span class="k">def</span> <span class="nf">validate_and_clip_range_filter</span><span class="p">(</span><span class="n">filter_range</span><span class="p">,</span> <span class="n">full_range</span><span class="p">,</span> <span class="n">val_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate and clip range values, for use in filtering datasets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filter_range (list or tuple): Range to use for filter, i.e.</span>
+<span class="sd">            ``[start_val, end_val)`` .</span>
+<span class="sd">        full_range (list or tuple): Full range available for filter, i.e.</span>
+<span class="sd">            ``[min_val, max_val)`` .</span>
+<span class="sd">        val_type: If specified, the type or types that each value in ``filter_range``</span>
+<span class="sd">            must be instances of.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Range for which null or too-small/large values have been</span>
+<span class="sd">        clipped to the min/max valid values.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError</span>
+<span class="sd">        ValueError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">range_</span> <span class="ow">in</span> <span class="p">(</span><span class="n">filter_range</span><span class="p">,</span> <span class="n">full_range</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">range_</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;range must be a list or tuple, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">range_</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">range_</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;range must have exactly two items: start and end&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">val_type</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">range_</span> <span class="ow">in</span> <span class="p">(</span><span class="n">filter_range</span><span class="p">,</span> <span class="n">full_range</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">range_</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val_type</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s2">&quot;range value </span><span class="si">{}</span><span class="s2"> must be </span><span class="si">{}</span><span class="s2">, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">val</span><span class="p">,</span> <span class="n">val_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filter_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">full_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">full_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;start of  range </span><span class="si">%s</span><span class="s2"> &lt; minimum valid value </span><span class="si">%s</span><span class="s2">; clipping range ...&quot;</span><span class="p">,</span>
+            <span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">full_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">filter_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">full_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filter_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">full_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">full_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;end of range </span><span class="si">%s</span><span class="s2"> &gt; maximum valid value </span><span class="si">%s</span><span class="s2">; clipping range ...&quot;</span><span class="p">,</span>
+            <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">full_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">filter_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">full_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">filter_range</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">textacy</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=chartbeat-labs&repo=textacy&type=watch&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019 Chartbeat, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

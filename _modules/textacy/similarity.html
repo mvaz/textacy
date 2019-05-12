@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.similarity &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -59,10 +57,9 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">extract</span>
-<span class="kn">from</span> <span class="nn">.doc</span> <span class="k">import</span> <span class="n">Doc</span>
 
 
-<span class="n">NONWORDCHARS_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\W+&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
+<span class="n">RE_NONWORDCHARS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\W+&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="word_movers"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word_movers">[docs]</a><span class="k">def</span> <span class="nf">word_movers</span><span class="p">(</span><span class="n">doc1</span><span class="p">,</span> <span class="n">doc2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">):</span>
@@ -71,8 +68,8 @@
 <span class="sd">    Distance.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        doc1 (:class:`textacy.Doc` or :class:`spacy.Doc`)</span>
-<span class="sd">        doc2 (:class:`textacy.Doc` or :class:`spacy.Doc`)</span>
+<span class="sd">        doc1 (:class:`spacy.tokens.Doc`)</span>
+<span class="sd">        doc2 (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        metric ({&#39;cosine&#39;, &#39;euclidean&#39;, &#39;l1&#39;, &#39;l2&#39;, &#39;manhattan&#39;})</span>
 
 <span class="sd">    Returns:</span>
@@ -122,21 +119,18 @@
 
 <div class="viewcode-block" id="word2vec"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word2vec">[docs]</a><span class="k">def</span> <span class="nf">word2vec</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Measure the semantic similarity between one Doc or spacy Doc, Span, Token,</span>
+<span class="sd">    Measure the semantic similarity between one spacy Doc, Span, Token,</span>
 <span class="sd">    or Lexeme and another like object using the cosine distance between the</span>
 <span class="sd">    objects&#39; (average) word2vec vectors.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        obj1 (``textacy.Doc``, ``spacy.Doc``, ``spacy.Span``, ``spacy.Token``, or ``spacy.Lexeme``)</span>
-<span class="sd">        obj2 (``textacy.Doc``, ``spacy.Doc``, ``spacy.Span``, ``spacy.Token``, or ``spacy.Lexeme``)</span>
+<span class="sd">        obj1 (:class:`spacy.tokens.Doc`, :class:`spacy.tokens.Span`, :class:`spacy.tokens.Token`, or ``spacy.Lexeme``)</span>
+<span class="sd">        obj2 (:class:`spacy.tokens.Doc`, :class:`spacy.tokens.Span`, :class:`spacy.tokens.Token`, or ``spacy.Lexeme``)</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">        float: similarity between `obj1` and `obj2` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: similarity between ``obj1`` and ``obj2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">Doc</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj2</span><span class="p">,</span> <span class="n">Doc</span><span class="p">):</span>
-        <span class="n">obj1</span> <span class="o">=</span> <span class="n">obj1</span><span class="o">.</span><span class="n">spacy_doc</span>
-        <span class="n">obj2</span> <span class="o">=</span> <span class="n">obj2</span><span class="o">.</span><span class="n">spacy_doc</span>
     <span class="k">return</span> <span class="n">obj1</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span></div>
 
 
@@ -144,7 +138,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the semantic similarity between two strings or sequences of strings</span>
 <span class="sd">    using Jaccard distance, with optional fuzzy matching of not-identical pairs</span>
-<span class="sd">    when `obj1` and `obj2` are sequences of strings.</span>
+<span class="sd">    when ``obj1`` and ``obj2`` are sequences of strings.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        obj1 (str or Sequence[str])</span>
@@ -156,12 +150,12 @@
 <span class="sd">            with a score &gt;= this value will be considered matches</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between `obj1` and `obj2` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: similarity between ``obj1`` and ``obj2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings or sequences</span>
 <span class="sd">        of strings</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: if `fuzzy_match` is True but `obj1` and `obj2` are strings</span>
+<span class="sd">        ValueError: if ``fuzzy_match`` is True but ``obj1`` and ``obj2`` are strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">match_threshold</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">match_threshold</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -201,7 +195,7 @@
 <span class="sd">        str2 (str)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings</span>
 
 <span class="sd">    Note:</span>
@@ -237,7 +231,7 @@
 <span class="sd">            of characters in the longest string; otherwise leave the distance as-is</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">distance</span> <span class="o">=</span> <span class="n">_levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">)</span>
@@ -257,7 +251,7 @@
 <span class="sd">            to consider the strings identical</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between `str1` and `str2` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="p">)</span></div>
@@ -278,21 +272,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">str1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">str2</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">0</span>
-    <span class="n">str1</span> <span class="o">=</span> <span class="n">_force_unicode</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
-    <span class="n">str2</span> <span class="o">=</span> <span class="n">_force_unicode</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
+    <span class="n">str1</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">to_unicode</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
+    <span class="n">str2</span> <span class="o">=</span> <span class="n">compat</span><span class="o">.</span><span class="n">to_unicode</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
     <span class="n">str1_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span>
     <span class="n">str2_proc</span> <span class="o">=</span> <span class="n">_process_and_sort</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_ratio</span><span class="p">(</span><span class="n">str1_proc</span><span class="p">,</span> <span class="n">str2_proc</span><span class="p">)</span></div>
-
-
-<span class="k">def</span> <span class="nf">_force_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Force ``s`` into unicode, or die trying.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">s</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">bytes_to_unicode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_process_and_sort</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -307,7 +291,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">NONWORDCHARS_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">RE_NONWORDCHARS</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 </pre></div>
 
           </div>
@@ -363,8 +347,6 @@
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -377,7 +359,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

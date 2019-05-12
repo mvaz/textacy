@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>textacy.io.http &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -43,12 +41,15 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
 <span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">closing</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">_make_dirs</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="read_http_stream"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.http.read_http_stream">[docs]</a><span class="k">def</span> <span class="nf">read_http_stream</span><span class="p">(</span>
@@ -94,25 +95,25 @@
 
 
 <div class="viewcode-block" id="write_http_stream"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.http.write_http_stream">[docs]</a><span class="k">def</span> <span class="nf">write_http_stream</span><span class="p">(</span>
-    <span class="n">url</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">url</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download data from ``url`` in a stream, and write successive chunks</span>
-<span class="sd">    to disk at ``fname``.</span>
+<span class="sd">    to disk at ``filepath``.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        url (str): URL to which a GET request is made for data.</span>
-<span class="sd">        fname (str): Path to file on disk to which data will be written.</span>
-<span class="sd">        mode (str): Mode with which ``fname`` is opened.</span>
+<span class="sd">        filepath (str): Path to file on disk to which data will be written.</span>
+<span class="sd">        mode (str): Mode with which ``filepath`` is opened.</span>
 <span class="sd">        encoding (str): Name of the encoding used to decode or encode the data</span>
-<span class="sd">            in ``fname``. Only applicable in text mode.</span>
+<span class="sd">            in ``filepath``. Only applicable in text mode.</span>
 
 <span class="sd">            .. note:: The encoding on the HTTP response is inferred from its</span>
 <span class="sd">               headers, or set to &#39;utf-8&#39; as a fall-back in the case that no</span>
 <span class="sd">               encoding is detected. It is *not* set by ``encoding``.</span>
 
 <span class="sd">        make_dirs (bool): If True, automatically create (sub)directories if</span>
-<span class="sd">            not already present in order to write ``fname``.</span>
+<span class="sd">            not already present in order to write ``filepath``.</span>
 <span class="sd">        chunk_size (int): Number of bytes read into memory per chunk. Because</span>
 <span class="sd">            decoding may occur, this is not necessarily the length of each chunk.</span>
 <span class="sd">        auth (Tuple[str, str]): (username, password) pair for simple HTTP</span>
@@ -122,24 +123,24 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">decode_unicode</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="s2">&quot;t&quot;</span> <span class="ow">in</span> <span class="n">mode</span> <span class="k">else</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">make_dirs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">_make_dirs</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-    <span class="c1"># always close the connection</span>
+        <span class="n">_make_dirs</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="c1"># use `closing` to ensure connection and progress bar *always* close</span>
     <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">auth</span><span class="p">))</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;downloading data from </span><span class="si">%s</span><span class="s2"> ...&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
         <span class="c1"># set fallback encoding if unable to infer from headers</span>
         <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">r</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span>
-        <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
-                <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">unit_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content-length&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="p">)</span>
-            <span class="n">chunks</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span>
-                <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">decode_unicode</span><span class="o">=</span><span class="n">decode_unicode</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
-                <span class="c1"># needed (?) to filter out &quot;keep-alive&quot; new chunks</span>
-                <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
-                    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span></div>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content-length&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">unit_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">))</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">chunks</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span>
+                    <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">decode_unicode</span><span class="o">=</span><span class="n">decode_unicode</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+                    <span class="c1"># needed (?) to filter out &quot;keep-alive&quot; new chunks</span>
+                    <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+                        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -195,8 +196,6 @@
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -209,7 +208,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

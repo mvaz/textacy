@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Overview: module code &#8212; textacy 0.6.3 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -37,10 +35,12 @@
 <li><a href="textacy/cache.html">textacy.cache</a></li>
 <li><a href="textacy/corpus.html">textacy.corpus</a></li>
 <li><a href="textacy/datasets/capitol_words.html">textacy.datasets.capitol_words</a></li>
+<li><a href="textacy/datasets/imdb.html">textacy.datasets.imdb</a></li>
 <li><a href="textacy/datasets/oxford_text_archive.html">textacy.datasets.oxford_text_archive</a></li>
 <li><a href="textacy/datasets/reddit_comments.html">textacy.datasets.reddit_comments</a></li>
 <li><a href="textacy/datasets/supreme_court.html">textacy.datasets.supreme_court</a></li>
-<li><a href="textacy/datasets/wikipedia.html">textacy.datasets.wikipedia</a></li>
+<li><a href="textacy/datasets/utils.html">textacy.datasets.utils</a></li>
+<li><a href="textacy/datasets/wikimedia.html">textacy.datasets.wikimedia</a></li>
 <li><a href="textacy/doc.html">textacy.doc</a></li>
 <li><a href="textacy/extract.html">textacy.extract</a></li>
 <li><a href="textacy/io/csv.html">textacy.io.csv</a></li>
@@ -51,13 +51,14 @@
 <li><a href="textacy/io/text.html">textacy.io.text</a></li>
 <li><a href="textacy/io/utils.html">textacy.io.utils</a></li>
 <li><a href="textacy/keyterms.html">textacy.keyterms</a></li>
+<li><a href="textacy/lang_utils.html">textacy.lang_utils</a></li>
 <li><a href="textacy/lexicon_methods.html">textacy.lexicon_methods</a></li>
 <li><a href="textacy/network.html">textacy.network</a></li>
 <li><a href="textacy/preprocess.html">textacy.preprocess</a></li>
 <li><a href="textacy/similarity.html">textacy.similarity</a></li>
 <li><a href="textacy/spacier/components.html">textacy.spacier.components</a></li>
+<li><a href="textacy/spacier/doc_extensions.html">textacy.spacier.doc_extensions</a></li>
 <li><a href="textacy/spacier/utils.html">textacy.spacier.utils</a></li>
-<li><a href="textacy/spacy_utils.html">textacy.spacy_utils</a></li>
 <li><a href="textacy/text_stats.html">textacy.text_stats</a></li>
 <li><a href="textacy/text_utils.html">textacy.text_utils</a></li>
 <li><a href="textacy/tm/topic_model.html">textacy.tm.topic_model</a></li>
@@ -118,8 +119,6 @@
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -132,7 +131,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
