@@ -37,9 +37,9 @@
 <div class="section" id="in-development">
 <h2>0.7.0 (in development)<a class="headerlink" href="#in-development" title="Permalink to this headline">¶</a></h2>
 <p>New and Changed:</p>
-<ul>
-<li><p><strong>Removed ``textacy.Doc``, and split its functionality into two parts</strong></p>
 <ul class="simple">
+<li><p><strong>Removed ``textacy.Doc``, and split its functionality into two parts</strong></p>
+<ul>
 <li><p><strong>New:</strong> Added <code class="docutils literal notranslate"><span class="pre">textacy.make_spacy_doc()</span></code> as a convenient and flexible entry point
 for making spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s from text or (text, metadata) pairs, with optional
 spaCy language pipeline specification. It’s similar to <code class="docutils literal notranslate"><span class="pre">textacy.Doc.__init__</span></code>,
@@ -54,7 +54,7 @@ Note that they are set automatically when textacy is imported.</p></li>
 </ul>
 </li>
 <li><p><strong>Simplified and improved performance of ``textacy.Corpus``</strong></p>
-<ul class="simple">
+<ul>
 <li><p>Documents are now added through a simpler API, either in <code class="docutils literal notranslate"><span class="pre">Corpus.__init__</span></code>
 or <code class="docutils literal notranslate"><span class="pre">Corpus.add()</span></code>; they may be one or a stream of texts, (text, metadata)
 pairs, or existing spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s. When adding many documents, the spaCy
@@ -63,12 +63,10 @@ language processing pipeline is used in a faster and more efficient way.</p></li
 <li><p>Note: <code class="docutils literal notranslate"><span class="pre">Corpus</span></code> is now a collection of spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s rather than <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> s.</p></li>
 </ul>
 </li>
-<li><p><strong>Simplified, standardized, and added ``Dataset`` functionality</strong>
-- <strong>New:</strong> Added an <code class="docutils literal notranslate"><span class="pre">IMDB</span></code> dataset, built on the classic 2011 dataset</p>
-<blockquote>
-<div><p>commonly used to train sentiment analysis models.</p>
-</div></blockquote>
-<ul class="simple">
+<li><p><strong>Simplified, standardized, and added ``Dataset`` functionality</strong></p>
+<ul>
+<li><p><strong>New:</strong> Added an <code class="docutils literal notranslate"><span class="pre">IMDB</span></code> dataset, built on the classic 2011 dataset
+commonly used to train sentiment analysis models.</p></li>
 <li><p><strong>New:</strong> Added a base <code class="docutils literal notranslate"><span class="pre">Wikimedia</span></code> dataset, from which a reworked
 <code class="docutils literal notranslate"><span class="pre">Wikipedia</span></code> dataset and a separate <code class="docutils literal notranslate"><span class="pre">Wikinews</span></code> dataset inherit.
 The underlying data source has changed, from XML db dumps of raw wiki markup
@@ -92,13 +90,11 @@ and consolidated in the <code class="docutils literal notranslate"><span class="
 <ul>
 <li><p>Reduced load time for <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">textacy</span></code> from ~2-3 seconds to ~1 second,
 by lazy-loading expensive variables, deferring a couple heavy imports, and
-dropping a couple dependencies. Specifically:
-- <code class="docutils literal notranslate"><span class="pre">ftfy</span></code> was dropped, and a <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> is now raised</p>
-<blockquote>
-<div><p>in textacy’s wrapper function, <code class="docutils literal notranslate"><span class="pre">textacy.preprocess.fix_bad_unicode()</span></code>.
-Users with bad unicode should now directly call <code class="docutils literal notranslate"><span class="pre">ftfy.fix_text()</span></code>.</p>
-</div></blockquote>
-<ul class="simple">
+dropping a couple dependencies. Specifically:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ftfy</span></code> was dropped, and a <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> is now raised
+in textacy’s wrapper function, <code class="docutils literal notranslate"><span class="pre">textacy.preprocess.fix_bad_unicode()</span></code>.
+Users with bad unicode should now directly call <code class="docutils literal notranslate"><span class="pre">ftfy.fix_text()</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ijson</span></code> was dropped, and the behavior of <code class="docutils literal notranslate"><span class="pre">textacy.read_json()</span></code>
 is now simpler and consistent with other functions for line-delimited data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">mwparserfromhell</span></code> was dropped, since the reworked <code class="docutils literal notranslate"><span class="pre">Wikipedia</span></code> dataset
@@ -106,27 +102,23 @@ no longer requires complicated and slow parsing of wiki markup.</p></li>
 </ul>
 </li>
 <li><p>Renamed certain functions and variables for clarity, and for consistency with
-existing conventions:
-- <code class="docutils literal notranslate"><span class="pre">textacy.load_spacy()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.load_spacy_lang()</span></code>
-- <code class="docutils literal notranslate"><span class="pre">textacy.extract.named_entities()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.extract.entities()</span></code>
-- <code class="docutils literal notranslate"><span class="pre">textacy.data_dir</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.DEFAULT_DATA_DIR</span></code>
-- <code class="docutils literal notranslate"><span class="pre">filename</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">filepath</span></code> and <code class="docutils literal notranslate"><span class="pre">dirname</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">dirpath</span></code> when specifying</p>
-<blockquote>
-<div><p>full paths to files/dirs on disk, and <code class="docutils literal notranslate"><span class="pre">textacy.io.utils.get_filenames()</span></code>
-=&gt; <code class="docutils literal notranslate"><span class="pre">textacy.io.utils.get_filepaths()</span></code> accordingly</p>
-</div></blockquote>
-<ul class="simple">
+existing conventions:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">textacy.load_spacy()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.load_spacy_lang()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">textacy.extract.named_entities()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.extract.entities()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">textacy.data_dir</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.DEFAULT_DATA_DIR</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filename</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">filepath</span></code> and <code class="docutils literal notranslate"><span class="pre">dirname</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">dirpath</span></code> when specifying
+full paths to files/dirs on disk, and <code class="docutils literal notranslate"><span class="pre">textacy.io.utils.get_filenames()</span></code>
+=&gt; <code class="docutils literal notranslate"><span class="pre">textacy.io.utils.get_filepaths()</span></code> accordingly</p></li>
 <li><p>compiled regular expressions now consistently start with <code class="docutils literal notranslate"><span class="pre">RE_</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Doc</span></code>, <code class="docutils literal notranslate"><span class="pre">SpacySpan</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Span</span></code>, <code class="docutils literal notranslate"><span class="pre">SpacyToken</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Token</span></code>,
 <code class="docutils literal notranslate"><span class="pre">SpacyLang</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Language</span></code> as variables and in docs</p></li>
 </ul>
 </li>
-<li><p>Removed deprecated functionality
-- top-level <code class="docutils literal notranslate"><span class="pre">spacy_utils.py</span></code> and <code class="docutils literal notranslate"><span class="pre">spacy_pipelines.py</span></code> are gone;</p>
-<blockquote>
-<div><p>use equivalent functionality in the <code class="docutils literal notranslate"><span class="pre">spacier</span></code> subpackage instead</p>
-</div></blockquote>
-<ul class="simple">
+<li><p>Removed deprecated functionality</p>
+<ul>
+<li><p>top-level <code class="docutils literal notranslate"><span class="pre">spacy_utils.py</span></code> and <code class="docutils literal notranslate"><span class="pre">spacy_pipelines.py</span></code> are gone;
+use equivalent functionality in the <code class="docutils literal notranslate"><span class="pre">spacier</span></code> subpackage instead</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">math_utils.py</span></code> is gone; it was long neglected, and never actually used</p></li>
 </ul>
 </li>
