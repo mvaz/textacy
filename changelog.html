@@ -34,6 +34,129 @@
             
   <div class="section" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="in-development">
+<h2>0.7.0 (in development)<a class="headerlink" href="#in-development" title="Permalink to this headline">¶</a></h2>
+<p>New and Changed:</p>
+<ul>
+<li><p><strong>Removed ``textacy.Doc``, and split its functionality into two parts</strong></p>
+<ul class="simple">
+<li><p><strong>New:</strong> Added <code class="docutils literal notranslate"><span class="pre">textacy.make_spacy_doc()</span></code> as a convenient and flexible entry point
+for making spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s from text or (text, metadata) pairs, with optional
+spaCy language pipeline specification. It’s similar to <code class="docutils literal notranslate"><span class="pre">textacy.Doc.__init__</span></code>,
+with the exception that text and metadata are passed in together as a 2-tuple.</p></li>
+<li><p><strong>New:</strong> Added a variety of custom doc property and method extensions to
+the global <code class="docutils literal notranslate"><span class="pre">spacy.tokens.Doc</span></code> class, accessible via its <code class="docutils literal notranslate"><span class="pre">Doc._</span></code> “underscore”
+property. These are similar to the properties/methods on <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code>,
+they just require an interstitial underscore. For example,
+<code class="docutils literal notranslate"><span class="pre">textacy.Doc.to_bag_of_words()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">spacy.tokens.Doc._.to_bag_of_words()</span></code>.</p></li>
+<li><p><strong>New:</strong> Added functions for setting, getting, and removing these extensions.
+Note that they are set automatically when textacy is imported.</p></li>
+</ul>
+</li>
+<li><p><strong>Simplified and improved performance of ``textacy.Corpus``</strong></p>
+<ul class="simple">
+<li><p>Documents are now added through a simpler API, either in <code class="docutils literal notranslate"><span class="pre">Corpus.__init__</span></code>
+or <code class="docutils literal notranslate"><span class="pre">Corpus.add()</span></code>; they may be one or a stream of texts, (text, metadata)
+pairs, or existing spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s. When adding many documents, the spaCy
+language processing pipeline is used in a faster and more efficient way.</p></li>
+<li><p>Saving / loading corpus data to disk is now more efficient and robust.</p></li>
+<li><p>Note: <code class="docutils literal notranslate"><span class="pre">Corpus</span></code> is now a collection of spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s rather than <code class="docutils literal notranslate"><span class="pre">textacy.Doc</span></code> s.</p></li>
+</ul>
+</li>
+<li><p><strong>Simplified, standardized, and added ``Dataset`` functionality</strong>
+- <strong>New:</strong> Added an <code class="docutils literal notranslate"><span class="pre">IMDB</span></code> dataset, built on the classic 2011 dataset</p>
+<blockquote>
+<div><p>commonly used to train sentiment analysis models.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>New:</strong> Added a base <code class="docutils literal notranslate"><span class="pre">Wikimedia</span></code> dataset, from which a reworked
+<code class="docutils literal notranslate"><span class="pre">Wikipedia</span></code> dataset and a separate <code class="docutils literal notranslate"><span class="pre">Wikinews</span></code> dataset inherit.
+The underlying data source has changed, from XML db dumps of raw wiki markup
+to JSON db dumps of (relatively) clean text and metadata; now, the code is
+simpler, faster, and totally language-agnostic.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dataset.records()</span></code> now streams (text, metadata) pairs rather than a dict
+containing both text and metadata, so users don’t need to know field names
+and split them into separate streams before creating <code class="docutils literal notranslate"><span class="pre">Doc</span></code> or <code class="docutils literal notranslate"><span class="pre">Corpus</span></code>
+objects from the data.</p></li>
+<li><p>Filtering and limiting the number of texts/records produced is now clearer
+and more consistent between <code class="docutils literal notranslate"><span class="pre">.texts()</span></code> and <code class="docutils literal notranslate"><span class="pre">.records()</span></code> methods on
+a given <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> — and more performant!</p></li>
+<li><p>Downloading datasets now always shows progress bars and saves to the same
+file names. When appropriate, downloaded archive files’ contents are
+automatically extracted for easy inspection.</p></li>
+<li><p>Common functionality (such as validating filter values) is now standardized
+and consolidated in the <code class="docutils literal notranslate"><span class="pre">datasets.utils</span></code> module.</p></li>
+</ul>
+</li>
+<li><p><strong>Quality of life improvements</strong></p>
+<ul>
+<li><p>Reduced load time for <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">textacy</span></code> from ~2-3 seconds to ~1 second,
+by lazy-loading expensive variables, deferring a couple heavy imports, and
+dropping a couple dependencies. Specifically:
+- <code class="docutils literal notranslate"><span class="pre">ftfy</span></code> was dropped, and a <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> is now raised</p>
+<blockquote>
+<div><p>in textacy’s wrapper function, <code class="docutils literal notranslate"><span class="pre">textacy.preprocess.fix_bad_unicode()</span></code>.
+Users with bad unicode should now directly call <code class="docutils literal notranslate"><span class="pre">ftfy.fix_text()</span></code>.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ijson</span></code> was dropped, and the behavior of <code class="docutils literal notranslate"><span class="pre">textacy.read_json()</span></code>
+is now simpler and consistent with other functions for line-delimited data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mwparserfromhell</span></code> was dropped, since the reworked <code class="docutils literal notranslate"><span class="pre">Wikipedia</span></code> dataset
+no longer requires complicated and slow parsing of wiki markup.</p></li>
+</ul>
+</li>
+<li><p>Renamed certain functions and variables for clarity, and for consistency with
+existing conventions:
+- <code class="docutils literal notranslate"><span class="pre">textacy.load_spacy()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.load_spacy_lang()</span></code>
+- <code class="docutils literal notranslate"><span class="pre">textacy.extract.named_entities()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.extract.entities()</span></code>
+- <code class="docutils literal notranslate"><span class="pre">textacy.data_dir</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.DEFAULT_DATA_DIR</span></code>
+- <code class="docutils literal notranslate"><span class="pre">filename</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">filepath</span></code> and <code class="docutils literal notranslate"><span class="pre">dirname</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">dirpath</span></code> when specifying</p>
+<blockquote>
+<div><p>full paths to files/dirs on disk, and <code class="docutils literal notranslate"><span class="pre">textacy.io.utils.get_filenames()</span></code>
+=&gt; <code class="docutils literal notranslate"><span class="pre">textacy.io.utils.get_filepaths()</span></code> accordingly</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>compiled regular expressions now consistently start with <code class="docutils literal notranslate"><span class="pre">RE_</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SpacyDoc</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Doc</span></code>, <code class="docutils literal notranslate"><span class="pre">SpacySpan</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Span</span></code>, <code class="docutils literal notranslate"><span class="pre">SpacyToken</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Token</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SpacyLang</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Language</span></code> as variables and in docs</p></li>
+</ul>
+</li>
+<li><p>Removed deprecated functionality
+- top-level <code class="docutils literal notranslate"><span class="pre">spacy_utils.py</span></code> and <code class="docutils literal notranslate"><span class="pre">spacy_pipelines.py</span></code> are gone;</p>
+<blockquote>
+<div><p>use equivalent functionality in the <code class="docutils literal notranslate"><span class="pre">spacier</span></code> subpackage instead</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">math_utils.py</span></code> is gone; it was long neglected, and never actually used</p></li>
+</ul>
+</li>
+<li><p>Replaced <code class="docutils literal notranslate"><span class="pre">textacy.compat.bytes_to_unicode()</span></code> and <code class="docutils literal notranslate"><span class="pre">textacy.compat.unicode_to_bytes()</span></code>
+with <code class="docutils literal notranslate"><span class="pre">textacy.compat.to_unicode()</span></code> and <code class="docutils literal notranslate"><span class="pre">textacy.compat.to_bytes()</span></code>, which
+are safer and accept either binary or text strings as input.</p></li>
+<li><p>Moved and renamed language detection functionality,
+<code class="docutils literal notranslate"><span class="pre">textacy.text_utils.detect_language()</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">textacy.lang_utils.detect_lang()</span></code>.
+The idea is to add more/better lang-related functionality here in the future.</p></li>
+<li><p>Updated and cleaned up documentation throughout the code base.</p></li>
+<li><p>Added and refactored _many_ tests, for both new and old functionality,
+significantly increasing test coverage while significantly reducing run-time.
+Also, added a proper coverage report to CI builds. This should help prevent
+future errors and inspire better test-writing.</p></li>
+<li><p>Bumped the minimum required spaCy version: <code class="docutils literal notranslate"><span class="pre">v2.0.0</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">v2.0.12</span></code>,
+for access to their full set of custom extension functionality.</p></li>
+</ul>
+</li>
+</ul>
+<p>Fixed:</p>
+<ul class="simple">
+<li><p>The progress bar during an HTTP download now always closes, preventing weird
+nesting issues if another bar is subsequently displayed.</p></li>
+<li><p>Filtering datasets by multiple values performed either a logical AND or OR
+over the values, which was confusing; now, a logical OR is always performed.</p></li>
+<li><p>The existence of files/directories on disk is now checked _properly_ via
+<code class="docutils literal notranslate"><span class="pre">os.path.isfile()</span></code> or <code class="docutils literal notranslate"><span class="pre">os.path.isdir()</span></code>, rather than <code class="docutils literal notranslate"><span class="pre">os.path.exists()</span></code>.</p></li>
+<li><p>Fixed a variety of formatting errors raised by sphinx when generating HTML docs.</p></li>
+</ul>
+</div>
 <div class="section" id="id1">
 <h2>0.6.3 (2019-03-23)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>New:</p>
@@ -1017,6 +1140,7 @@ into single tokens within a <code class="docutils literal notranslate"><span cla
 <li class="toctree-l1"><a class="reference internal" href="getting_started/quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#in-development">0.7.0 (in development)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id1">0.6.3 (2019-03-23)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id2">0.6.2 (2018-07-19)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id3">0.6.1 (2018-04-11)</a></li>
