@@ -128,7 +128,7 @@ of texts or (text, metadata) pairs:</p>
 <span class="go">Corpus(76 docs, 55906 tokens)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="k">lambda</span> <span class="n">doc</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;speaker_name&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;Rick Santorum&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span>
-<span class="go">Corpus(67 docs, 50662 tokens)</span>
+<span class="go">Corpus(61 docs, 48567 tokens)</span>
 </pre></div>
 </div>
 <p>Get subsets of documents matching your particular use case:</p>
@@ -149,29 +149,29 @@ of texts or (text, metadata) pairs:</p>
 <span class="go"> &#39;Doc(336 tokens: &quot;Mr. Speaker, I thank the gentleman for yielding...&quot;)&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">corpus</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span>
-<span class="go">Corpus(62 docs, 49754 tokens)</span>
+<span class="go">Corpus(56 docs, 41573 tokens)</span>
 </pre></div>
 </div>
 <p>Compute basic corpus statistics:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">n_docs</span><span class="p">,</span> <span class="n">corpus</span><span class="o">.</span><span class="n">n_sents</span><span class="p">,</span> <span class="n">corpus</span><span class="o">.</span><span class="n">n_tokens</span>
-<span class="go">(62, 2193, 49754)</span>
+<span class="go">(56, 1771, 41573)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">word_counts</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">word_counts</span><span class="p">(</span><span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">word_counts</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
-<span class="go">[(&#39;-PRON-&#39;, 3068), (&#39;people&#39;, 248), (&#39;year&#39;, 171), (&#39;work&#39;, 156), (&#39;$&#39;, 153)]</span>
+<span class="go">[(&#39;-PRON-&#39;, 2553), (&#39;people&#39;, 215), (&#39;year&#39;, 148), (&#39;Mr.&#39;, 139), (&#39;$&#39;, 137)]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">word_doc_counts</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">word_doc_counts</span><span class="p">(</span><span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="n">as_strings</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">word_doc_counts</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
-<span class="go">[(&#39;-PRON-&#39;, 0.9838709677419355),</span>
-<span class="go"> (&#39;Mr.&#39;, 0.7258064516129032),</span>
-<span class="go"> (&#39;President&#39;, 0.5483870967741935),</span>
-<span class="go"> (&#39;ask&#39;, 0.45161290322580644),</span>
-<span class="go"> (&#39;year&#39;, 0.45161290322580644)]</span>
+<span class="go">[(&#39;-PRON-&#39;, 0.9821428571428571),</span>
+<span class="go"> (&#39;Mr.&#39;, 0.7678571428571429),</span>
+<span class="go"> (&#39;President&#39;, 0.5),</span>
+<span class="go"> (&#39;people&#39;, 0.48214285714285715),</span>
+<span class="go"> (&#39;need&#39;, 0.44642857142857145)]</span>
 </pre></div>
 </div>
 <p>Save corpus data to and load from disk:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;~/Desktop/capitol_words_sample.bin&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;~/Desktop/capitol_words_sample.bin&quot;</span><span class="p">)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;~/Desktop/capitol_words_sample.bin.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span> <span class="o">=</span> <span class="n">textacy</span><span class="o">.</span><span class="n">Corpus</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="s2">&quot;~/Desktop/capitol_words_sample.bin.gz&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span>
-<span class="go">Corpus(62 docs, 49754 tokens)</span>
+<span class="go">Corpus(56 docs, 41573 tokens)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">

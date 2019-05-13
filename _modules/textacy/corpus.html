@@ -86,7 +86,7 @@
 <span class="sd">        Corpus(76 docs, 55906 tokens)</span>
 <span class="sd">        &gt;&gt;&gt; corpus.remove(lambda doc: doc._.meta.get(&quot;speaker_name&quot;) == &quot;Rick Santorum&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; corpus</span>
-<span class="sd">        Corpus(67 docs, 50662 tokens)</span>
+<span class="sd">        Corpus(61 docs, 48567 tokens)</span>
 
 <span class="sd">    Get subsets of documents matching your particular use case:</span>
 
@@ -111,33 +111,33 @@
 <span class="sd">         &#39;Doc(336 tokens: &quot;Mr. Speaker, I thank the gentleman for yielding...&quot;)&#39;]</span>
 <span class="sd">        &gt;&gt;&gt; del corpus[:5]</span>
 <span class="sd">        &gt;&gt;&gt; corpus</span>
-<span class="sd">        Corpus(62 docs, 49754 tokens)</span>
+<span class="sd">        Corpus(56 docs, 41573 tokens)</span>
 
 <span class="sd">    Compute basic corpus statistics:</span>
 
 <span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; corpus.n_docs, corpus.n_sents, corpus.n_tokens</span>
-<span class="sd">        (62, 2193, 49754)</span>
+<span class="sd">        (56, 1771, 41573)</span>
 <span class="sd">        &gt;&gt;&gt; word_counts = corpus.word_counts(as_strings=True)</span>
 <span class="sd">        &gt;&gt;&gt; sorted(word_counts.items(), key=lambda x: x[1], reverse=True)[:5]</span>
-<span class="sd">        [(&#39;-PRON-&#39;, 3068), (&#39;people&#39;, 248), (&#39;year&#39;, 171), (&#39;work&#39;, 156), (&#39;$&#39;, 153)]</span>
+<span class="sd">        [(&#39;-PRON-&#39;, 2553), (&#39;people&#39;, 215), (&#39;year&#39;, 148), (&#39;Mr.&#39;, 139), (&#39;$&#39;, 137)]</span>
 <span class="sd">        &gt;&gt;&gt; word_doc_counts = corpus.word_doc_counts(weighting=&quot;freq&quot;, as_strings=True)</span>
 <span class="sd">        &gt;&gt;&gt; sorted(word_doc_counts.items(), key=lambda x: x[1], reverse=True)[:5]</span>
-<span class="sd">        [(&#39;-PRON-&#39;, 0.9838709677419355),</span>
-<span class="sd">         (&#39;Mr.&#39;, 0.7258064516129032),</span>
-<span class="sd">         (&#39;President&#39;, 0.5483870967741935),</span>
-<span class="sd">         (&#39;ask&#39;, 0.45161290322580644),</span>
-<span class="sd">         (&#39;year&#39;, 0.45161290322580644)]</span>
+<span class="sd">        [(&#39;-PRON-&#39;, 0.9821428571428571),</span>
+<span class="sd">         (&#39;Mr.&#39;, 0.7678571428571429),</span>
+<span class="sd">         (&#39;President&#39;, 0.5),</span>
+<span class="sd">         (&#39;people&#39;, 0.48214285714285715),</span>
+<span class="sd">         (&#39;need&#39;, 0.44642857142857145)]</span>
 
 <span class="sd">    Save corpus data to and load from disk:</span>
 
 <span class="sd">    .. code-block:: pycon</span>
 
-<span class="sd">        &gt;&gt;&gt; corpus.save(&quot;~/Desktop/capitol_words_sample.bin&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus.load(&quot;en&quot;, &quot;~/Desktop/capitol_words_sample.bin&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; corpus.save(&quot;~/Desktop/capitol_words_sample.bin.gz&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus.load(&quot;en&quot;, &quot;~/Desktop/capitol_words_sample.bin.gz&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; corpus</span>
-<span class="sd">        Corpus(62 docs, 49754 tokens)</span>
+<span class="sd">        Corpus(56 docs, 41573 tokens)</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lang (str or :class:`spacy.language.Language`):</span>
@@ -407,8 +407,14 @@
 <span class="sd">           5; etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">matched_docs</span> <span class="o">=</span> <span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">match_func</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">matched_docs</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_one_doc_by_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">doc</span><span class="p">)))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_many_docs_by_index</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">doc</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">matched_docs</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_remove_many_docs_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_one_doc_by_index</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_remove_one_doc_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
@@ -418,10 +424,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">n_sents</span> <span class="o">-=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">sents</span><span class="p">)</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_ids</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">_remove_many_docs_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_one_doc_by_index</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
     <span class="c1"># useful properties</span>
 
