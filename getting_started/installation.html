@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Installation &#8212; textacy 0.7.0 documentation</title>
+    <title>Installation &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -42,12 +42,6 @@
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> conda install -c conda-forge textacy
 </pre></div>
 </div>
-<p><strong>Note:</strong> Some dependencies have been made optional, because they can be difficult
-to install or are only needed in certain uses cases. See the next section for details.
-To install all optional dependencies:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install textacy<span class="o">[</span>all<span class="o">]</span>
-</pre></div>
-</div>
 <p>If you prefer — or are obliged — to do things the hard way, you can download
 and unzip the source <code class="docutils literal notranslate"><span class="pre">tar.gz</span></code> from  PyPi, then install manually:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python setup.py install
@@ -55,36 +49,36 @@ and unzip the source <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="section" id="dependencies">
 <span id="installation-dependencies"></span><h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Given the multi-purpose breadth of its functionality, <code class="docutils literal notranslate"><span class="pre">textacy</span></code> depends on a
-number of other Python packages. Most of these are typical components in the
-PyData stack, but a few are more niche, and a couple have been known to cause
-trouble during the installation process.</p>
-<p>For example, to use visualization functions, you’ll need <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> installed;
-you can do so via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">textacy[viz]</span></code>. For automatic language detection,
-you’ll need <code class="docutils literal notranslate"><span class="pre">cld2-cffi</span></code> installed; do <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">textacy[lang]</span></code>.</p>
-<p>…</p>
+<p>Given the breadth of functionality, <code class="docutils literal notranslate"><span class="pre">textacy</span></code> depends on a number of other
+Python packages. Most of these are typical components in the PyData stack,
+but a few are certainly more niche. One heavy dependency has been made optional.</p>
+<p>Specifically: To use visualization functionality, you’ll need <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> installed;
+you can do so via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">textacy[viz]</span></code> or <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">matplotlib</span></code>.</p>
 </div>
 <div class="section" id="downloading-data">
 <span id="installation-downloading-data"></span><h2>Downloading Data<a class="headerlink" href="#downloading-data" title="Permalink to this headline">¶</a></h2>
-<p>For most uses of <code class="docutils literal notranslate"><span class="pre">textacy</span></code>, language-specific model data in <code class="docutils literal notranslate"><span class="pre">spacy</span></code> is
-required. Fortunately, <code class="docutils literal notranslate"><span class="pre">spacy</span></code> makes the process of getting this data easy and
-flexible; just follow <a class="reference external" href="https://spacy.io/docs/usage/models">the instructions in its docs</a>,
+<p>For most uses of textacy, language-specific model data in spaCy is required.
+Fortunately, spaCy makes the process of getting this data easy and flexible;
+just follow <a class="reference external" href="https://spacy.io/docs/usage/models">the instructions in its docs</a>,
 which also includes a list of <a class="reference external" href="https://spacy.io/usage/models#section-available">currently-supported languages and their models</a>.</p>
-<p>Note: If you install specific versions of a given language’s model data
-(e.g. “en_core_web_sm” instead of just “en”), you’ll probably want to create
-a shortcut link to the standard two-letter form of the language so that it will
-work as expected with textacy’s automatic language detection.</p>
-<p><code class="docutils literal notranslate"><span class="pre">textacy</span></code> itself features convenient access to several datasets comprised of
+<p><strong>Note:</strong> If you install specific versions of a given language’s model data
+(e.g. “en_core_web_sm” instead of just “en”), you’ll want to create a shortcut link
+to the corresponding standard two-letter form of the language so that it will
+work as expected with textacy’s automatic language identification. For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m spacy download en_core_web_sm
+<span class="gp">$</span> python -m spacy link en_core_web_sm en
+</pre></div>
+</div>
+<p>textacy itself features convenient access to several datasets comprised of
 thousands of text + metadata records. Data can be downloaded via the <code class="docutils literal notranslate"><span class="pre">.download()</span></code>
-method on corresponding dataset classes (see <a class="reference internal" href="../api_reference.html#ref-api-datasets"><span class="std std-ref">datasets</span></a> for details)
+method on corresponding dataset classes (see <a class="reference internal" href="../api_reference/datasets.html#api-reference-datasets"><span class="std std-ref">Datasets</span></a> for details)
 or directly from the command line.</p>
-<p>For example:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m textacy download capitol_words
 </pre></div>
 </div>
 <p>will download and save a compressed json file with ~11k speeches given by the
 main protagonists of the 2016 U.S. Presidential election (that had previously
-served in the U.S. Congress). For more options, run</p>
+served in the U.S. Congress). For more information, run</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m textacy --help
 </pre></div>
 </div>
@@ -137,8 +131,8 @@ served in the U.S. Congress). For more options, run</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
 </ul>
 
@@ -152,10 +146,10 @@ served in the U.S. Congress). For more options, run</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -169,7 +163,7 @@ served in the U.S. Congress). For more options, run</p>
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

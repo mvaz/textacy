@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.vsm.matrix_utils &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.vsm.matrix_utils &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -45,7 +45,7 @@
 <span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
 
 
-<div class="viewcode-block" id="get_term_freqs"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_term_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_term_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="get_term_freqs"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.get_term_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_term_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute frequencies for all terms in a document-term matrix, with optional</span>
 <span class="sd">    sub-linear scaling.</span>
@@ -83,7 +83,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_doc_freqs"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="get_doc_freqs"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.get_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute document frequencies for all terms in a document-term matrix.</span>
 
@@ -107,7 +107,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_terms</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_inverse_doc_freqs"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_inverse_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;smooth&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="get_inverse_doc_freqs"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.get_inverse_doc_freqs">[docs]</a><span class="k">def</span> <span class="nf">get_inverse_doc_freqs</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;smooth&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute inverse document frequencies for all terms in a document-term matrix,</span>
 <span class="sd">    using one of several IDF formulations.</span>
@@ -150,7 +150,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_doc_lengths"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_doc_lengths">[docs]</a><span class="k">def</span> <span class="nf">get_doc_lengths</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="get_doc_lengths"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.get_doc_lengths">[docs]</a><span class="k">def</span> <span class="nf">get_doc_lengths</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the lengths (i.e. number of terms) for all documents in a</span>
 <span class="sd">    document-term matrix.</span>
@@ -185,7 +185,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_information_content"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.get_information_content">[docs]</a><span class="k">def</span> <span class="nf">get_information_content</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="get_information_content"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.get_information_content">[docs]</a><span class="k">def</span> <span class="nf">get_information_content</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute information content for all terms in a document-term matrix. IC is a</span>
 <span class="sd">    float in [0.0, 1.0], defined as ``-df * log2(df) - (1 - df) * log2(1 - df)``,</span>
@@ -214,7 +214,7 @@
     <span class="k">return</span> <span class="n">ics</span></div>
 
 
-<div class="viewcode-block" id="apply_idf_weighting"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.apply_idf_weighting">[docs]</a><span class="k">def</span> <span class="nf">apply_idf_weighting</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;smooth&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="apply_idf_weighting"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.apply_idf_weighting">[docs]</a><span class="k">def</span> <span class="nf">apply_idf_weighting</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;smooth&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply inverse document frequency (idf) weighting to a term-frequency (tf)</span>
 <span class="sd">    weighted document-term matrix, using one of several IDF formulations.</span>
@@ -235,7 +235,7 @@
     <span class="k">return</span> <span class="n">doc_term_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">idfs</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="filter_terms_by_df"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.filter_terms_by_df">[docs]</a><span class="k">def</span> <span class="nf">filter_terms_by_df</span><span class="p">(</span>
+<div class="viewcode-block" id="filter_terms_by_df"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.filter_terms_by_df">[docs]</a><span class="k">def</span> <span class="nf">filter_terms_by_df</span><span class="p">(</span>
     <span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">term_to_id</span><span class="p">,</span> <span class="n">max_df</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">min_df</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -312,7 +312,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">[:,</span> <span class="n">kept_indices</span><span class="p">],</span> <span class="n">term_to_id</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="filter_terms_by_ic"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.matrix_utils.filter_terms_by_ic">[docs]</a><span class="k">def</span> <span class="nf">filter_terms_by_ic</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">term_to_id</span><span class="p">,</span> <span class="n">min_ic</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="filter_terms_by_ic"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.matrix_utils.filter_terms_by_ic">[docs]</a><span class="k">def</span> <span class="nf">filter_terms_by_ic</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">term_to_id</span><span class="p">,</span> <span class="n">min_ic</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter out terms that are too common and/or too rare (by information content),</span>
 <span class="sd">    and compactify the top ``max_n_terms`` in the ``id_to_term`` mapping accordingly.</span>
@@ -406,8 +406,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -421,10 +421,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -438,7 +438,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

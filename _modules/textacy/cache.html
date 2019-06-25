@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.cache &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.cache &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -48,6 +48,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
+<span class="kn">import</span> <span class="nn">joblib</span>
 <span class="kn">import</span> <span class="nn">spacy</span>
 <span class="kn">from</span> <span class="nn">cachetools</span> <span class="k">import</span> <span class="n">cached</span><span class="p">,</span> <span class="n">LRUCache</span>
 <span class="kn">from</span> <span class="nn">cachetools.keys</span> <span class="k">import</span> <span class="n">hashkey</span>
@@ -98,22 +99,24 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="clear"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.clear">[docs]</a><span class="k">def</span> <span class="nf">clear</span><span class="p">():</span>
+<div class="viewcode-block" id="clear"><a class="viewcode-back" href="../../api_reference/utils.html#textacy.cache.clear">[docs]</a><span class="k">def</span> <span class="nf">clear</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Clear textacy&#39;s cache of loaded data.&quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">LRU_CACHE</span>
     <span class="n">LRU_CACHE</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="load_spacy_lang"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_spacy_lang">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s2">&quot;spacy_lang&quot;</span><span class="p">))</span>
-<span class="k">def</span> <span class="nf">load_spacy_lang</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="load_spacy_lang"><a class="viewcode-back" href="../../api_reference/utils.html#textacy.cache.load_spacy_lang">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s2">&quot;spacy_lang&quot;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">load_spacy_lang</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_blank</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load a spaCy language processing pipeline (model weights as binary data,</span>
-<span class="sd">    sequence of component functions, and language-specific data) for tokenizing</span>
-<span class="sd">    and annotating text. An LRU cache saves language pipelines in memory.</span>
+<span class="sd">    Load a spaCy ``Language``: a shared vocabulary and language-specific data</span>
+<span class="sd">    for tokenizing text, and (if available) model data and a processing pipeline</span>
+<span class="sd">    containing a sequence of components for annotating a document.</span>
+<span class="sd">    An LRU cache saves languages in memory.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        name (str or :class:`pathlib.Path`): spaCy language pipeline to load,</span>
-<span class="sd">            i.e. a shortcut link, full package name, or path to model directory.</span>
+<span class="sd">        name (str or :class:`pathlib.Path`): spaCy language to load.</span>
+<span class="sd">            Could be a shortcut link, full package name, or path to model directory,</span>
+<span class="sd">            or a 2-letter ISO language code for which spaCy has language data.</span>
 <span class="sd">        disable (Tuple[str]): Names of pipeline components to disable, if any.</span>
 
 <span class="sd">            .. note:: Although spaCy&#39;s API specifies this argument as a list,</span>
@@ -121,19 +124,39 @@
 <span class="sd">               with unique identifiers generated from the hash of the function</span>
 <span class="sd">               name and args --- and lists aren&#39;t hashable.</span>
 
+<span class="sd">        allow_blank (bool): If True, allow loading of blank spaCy ``Language`` s;</span>
+<span class="sd">            if False, raise an OSError/IOError if a full processing pipeline</span>
+<span class="sd">            isn&#39;t available. Note that spaCy ``Doc`` s produced by blank languages</span>
+<span class="sd">            are missing key functionality, e.g. POS tags, entities, sentences.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        ``spacy.&lt;lang&gt;.&lt;Language&gt;``: A loaded ``Language`` pipeline.</span>
+<span class="sd">        :class:`spacy.language.Language`: A loaded spaCy ``Language``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        OSError/IOError</span>
+<span class="sd">        ImportError</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        https://spacy.io/api/top-level#spacy.load</span>
+<span class="sd">        * https://spacy.io/api/top-level#spacy.load</span>
+<span class="sd">        * https://spacy.io/api/top-level#spacy.blank</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">disable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">disable</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading &quot;</span><span class="si">%s</span><span class="s1">&quot; spaCy pipeline&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">)</span></div>
+    <span class="c1"># load a full spacy lang processing pipeline</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">disable</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;loaded &#39;</span><span class="si">%s</span><span class="s2">&#39; spaCy language pipeline&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spacy_lang</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># fall back to a blank spacy lang</span>
+        <span class="k">if</span> <span class="n">allow_blank</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">spacy_lang</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">blank</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;loaded &#39;</span><span class="si">%s</span><span class="s2">&#39; spaCy language blank&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">spacy_lang</span>
+        <span class="k">raise</span> <span class="n">e</span></div>
 
 
-<div class="viewcode-block" id="load_hyphenator"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_hyphenator">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s2">&quot;hyphenator&quot;</span><span class="p">))</span>
+<div class="viewcode-block" id="load_hyphenator"><a class="viewcode-back" href="../../api_reference/utils.html#textacy.cache.load_hyphenator">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s2">&quot;hyphenator&quot;</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">load_hyphenator</span><span class="p">(</span><span class="n">lang</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load an object that hyphenates words at valid points, as used in LaTex typesetting.</span>
@@ -157,7 +180,7 @@
     <span class="k">return</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">Pyphen</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_depechemood"><a class="viewcode-back" href="../../api_reference.html#textacy.cache.load_depechemood">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s2">&quot;depechemood&quot;</span><span class="p">))</span>
+<div class="viewcode-block" id="load_depechemood"><a class="viewcode-back" href="../../api_reference/utils.html#textacy.cache.load_depechemood">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">LRU_CACHE</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">hashkey</span><span class="p">,</span> <span class="s2">&quot;depechemood&quot;</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">load_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;normfreq&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load DepecheMood lexicon text file from disk, munge into nested dictionary</span>
@@ -251,8 +274,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -266,10 +289,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -283,7 +306,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

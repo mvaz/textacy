@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.datasets.utils &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.datasets.utils &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -50,12 +50,13 @@
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="k">import</span> <span class="n">to_collection</span>
 <span class="kn">from</span> <span class="nn">..io</span> <span class="k">import</span> <span class="n">write_http_stream</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="download_file"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.download_file">[docs]</a><span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dirpath</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_DATA_DIR</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="download_file"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.utils.download_file">[docs]</a><span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dirpath</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_DATA_DIR</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download a file from ``url`` and save it to disk.</span>
 
@@ -86,7 +87,7 @@
     <span class="k">return</span> <span class="n">filepath</span></div>
 
 
-<div class="viewcode-block" id="get_filename_from_url"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.get_filename_from_url">[docs]</a><span class="k">def</span> <span class="nf">get_filename_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="get_filename_from_url"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.utils.get_filename_from_url">[docs]</a><span class="k">def</span> <span class="nf">get_filename_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Derive a filename from a URL&#39;s path.</span>
 
@@ -99,7 +100,7 @@
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">compat</span><span class="o">.</span><span class="n">url_unquote_plus</span><span class="p">(</span><span class="n">url</span><span class="p">))</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="unpack_archive"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.unpack_archive">[docs]</a><span class="k">def</span> <span class="nf">unpack_archive</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">extract_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="unpack_archive"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.utils.unpack_archive">[docs]</a><span class="k">def</span> <span class="nf">unpack_archive</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">extract_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract data from a zip or tar archive file into a directory</span>
 <span class="sd">    (or do nothing if the file isn&#39;t an archive).</span>
@@ -160,38 +161,7 @@
             <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="n">src_basename</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="to_collection"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.to_collection">[docs]</a><span class="k">def</span> <span class="nf">to_collection</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val_type</span><span class="p">,</span> <span class="n">col_type</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Validate and cast a filter value to a collection of filter values.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        val (object)</span>
-<span class="sd">        val_type (type)</span>
-<span class="sd">        col_type (type)</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        object: collection of type ``col_type`` with values all of type ``val_type``</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        TypeError</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val_type</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">col_type</span><span class="p">([</span><span class="n">val</span><span class="p">])</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">val_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;not all values are of type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val_type</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">col_type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;values must be </span><span class="si">{}</span><span class="s2"> or a collection thereof, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">val_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">),</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="validate_set_member_filter"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.validate_set_member_filter">[docs]</a><span class="k">def</span> <span class="nf">validate_set_member_filter</span><span class="p">(</span><span class="n">filter_vals</span><span class="p">,</span> <span class="n">vals_type</span><span class="p">,</span> <span class="n">valid_vals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="validate_set_member_filter"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.utils.validate_set_member_filter">[docs]</a><span class="k">def</span> <span class="nf">validate_set_member_filter</span><span class="p">(</span><span class="n">filter_vals</span><span class="p">,</span> <span class="n">vals_type</span><span class="p">,</span> <span class="n">valid_vals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Validate filter values that must be of a certain type or</span>
 <span class="sd">    found among a set of known values.</span>
@@ -221,7 +191,7 @@
     <span class="k">return</span> <span class="n">filter_vals</span></div>
 
 
-<div class="viewcode-block" id="validate_and_clip_range_filter"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.utils.validate_and_clip_range_filter">[docs]</a><span class="k">def</span> <span class="nf">validate_and_clip_range_filter</span><span class="p">(</span><span class="n">filter_range</span><span class="p">,</span> <span class="n">full_range</span><span class="p">,</span> <span class="n">val_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="validate_and_clip_range_filter"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.utils.validate_and_clip_range_filter">[docs]</a><span class="k">def</span> <span class="nf">validate_and_clip_range_filter</span><span class="p">(</span><span class="n">filter_range</span><span class="p">,</span> <span class="n">full_range</span><span class="p">,</span> <span class="n">val_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Validate and clip range values, for use in filtering datasets.</span>
 
@@ -311,8 +281,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -326,10 +296,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -343,7 +313,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

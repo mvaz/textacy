@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.spacier.components &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.spacier.components &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -32,8 +32,8 @@
             
   <h1>Source code for textacy.spacier.components</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Components</span>
-<span class="sd">----------</span>
+<span class="sd">Pipeline Components</span>
+<span class="sd">-------------------</span>
 
 <span class="sd">Custom components to add to a spaCy language pipeline.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -46,11 +46,12 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">spacier_utils</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">text_stats</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">utils</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TextStatsComponent"><a class="viewcode-back" href="../../../api_reference.html#textacy.spacier.components.TextStatsComponent">[docs]</a><span class="k">class</span> <span class="nc">TextStatsComponent</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="TextStatsComponent"><a class="viewcode-back" href="../../../api_reference/spacier.html#textacy.spacier.components.TextStatsComponent">[docs]</a><span class="k">class</span> <span class="nc">TextStatsComponent</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A custom component to be added to a spaCy language pipeline that computes</span>
 <span class="sd">    one, some, or all text stats for a parsed doc and sets the values</span>
@@ -147,10 +148,11 @@
         <span class="k">return</span> <span class="n">doc</span></div>
 
 
-<div class="viewcode-block" id="merge_entities"><a class="viewcode-back" href="../../../api_reference.html#textacy.spacier.components.merge_entities">[docs]</a><span class="k">def</span> <span class="nf">merge_entities</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+<div class="viewcode-block" id="merge_entities"><a class="viewcode-back" href="../../../api_reference/spacier.html#textacy.spacier.components.merge_entities">[docs]</a><span class="k">def</span> <span class="nf">merge_entities</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Merge named entities into single tokens in ``doc``, *in-place*. Can be used</span>
-<span class="sd">    as a stand-alone function, or as part of a spaCy language pipeline::</span>
+<span class="sd">    Merge named entities into single tokens in ``doc``, *in-place*.</span>
+
+<span class="sd">    Can be used as a stand-alone function, or as part of a spaCy language pipeline::</span>
 
 <span class="sd">        &gt;&gt;&gt; spacy_lang = textacy.load_spacy_lang(&#39;en&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; spacy_lang.add_pipe(merge_entities, after=&#39;ner&#39;)</span>
@@ -163,7 +165,18 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        :class:`spacy.tokens.Doc`: Input ``doc`` with entities merged.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        *DEPRECATED!* For equivalent functionality, use</span>
+<span class="sd">        :func:`spacy.pipeline.functions.merge_entities()` instead.</span>
+<span class="sd">        For details, see https://spacy.io/api/pipeline-functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">deprecated</span><span class="p">(</span>
+        <span class="s2">&quot;`merge_entities()` has been deprecated! for equivalent functionality, &quot;</span>
+        <span class="s2">&quot;use :func:`spacy.pipeline.functions.merge_entities()` instead. &quot;</span>
+        <span class="s2">&quot;For details, see https://spacy.io/api/pipeline-functions.&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;once&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">spacier_utils</span><span class="o">.</span><span class="n">merge_spans</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">ents</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">doc</span></div>
 </pre></div>
@@ -201,8 +214,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -216,10 +229,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -233,7 +246,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

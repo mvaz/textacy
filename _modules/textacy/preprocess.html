@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.preprocess &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.preprocess &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -35,8 +35,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions that modify raw text *in-place*, replacing contractions, URLs, emails,</span>
 <span class="sd">phone numbers, and currency symbols with standardized forms. These should be</span>
-<span class="sd">applied before processing by `Spacy &lt;http://spacy.io&gt;`_, but be warned: preprocessing</span>
-<span class="sd">may affect the interpretation of the text -- and spacy&#39;s processing of it.</span>
+<span class="sd">applied before processing by spaCy, but be warned: preprocessing may affect</span>
+<span class="sd">the interpretation of the text -- and spaCy&#39;s processing of it.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span>
 
@@ -46,18 +46,19 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
 
 
-<div class="viewcode-block" id="fix_bad_unicode"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.fix_bad_unicode">[docs]</a><span class="k">def</span> <span class="nf">fix_bad_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;NFC&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="fix_bad_unicode"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.fix_bad_unicode">[docs]</a><span class="k">def</span> <span class="nf">fix_bad_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;NFC&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Fix unicode text that&#39;s &quot;broken&quot; using `ftfy &lt;https://ftfy.readthedocs.io&gt;`_;</span>
+<span class="sd">    Fix unicode text that&#39;s &quot;broken&quot; using ``ftfy``;</span>
 <span class="sd">    this includes mojibake, HTML entities and other code cruft,</span>
 <span class="sd">    and non-standard forms for display purposes.</span>
 
 <span class="sd">    Warning:</span>
 <span class="sd">        As of v0.7.0, this is no longer implemented within textacy. Instead,</span>
-<span class="sd">        install and import ``ftfy`` independently, then call ``ftfy.fix_text(text)``</span>
-<span class="sd">        with a much larger variety of params, as needed for your use case.</span>
+<span class="sd">        install and import ``ftfy`` directly, and call ``ftfy.fix_text(text)`` ,</span>
+<span class="sd">        which is more extensive and customizable than textacy&#39;s wrapper of it.</span>
+<span class="sd">        For details, check out https://ftfy.readthedocs.io.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
         <span class="s2">&quot;As of v0.7.0, :func:`fix_bad_unicode()` is no longer implemented in textacy. &quot;</span>
         <span class="s2">&quot;Instead, install and import ``ftfy`` directly, and call ``ftfy.fix_text(text)`` ,&quot;</span>
         <span class="s2">&quot;which is more extensive and customizable than textacy&#39;s wrapper of it.&quot;</span>
@@ -65,9 +66,29 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="normalize_whitespace"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.normalize_whitespace">[docs]</a><span class="k">def</span> <span class="nf">normalize_whitespace</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<div class="viewcode-block" id="normalize_unicode"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.normalize_unicode">[docs]</a><span class="k">def</span> <span class="nf">normalize_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="s2">&quot;NFC&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given ``text`` str, replace one or more spacings with a single space, and one</span>
+<span class="sd">    Normalize unicode characters in ``text`` into canonical forms.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str): Raw text.</span>
+<span class="sd">        form ({&quot;NFC&quot;, &quot;NFD&quot;, &quot;NFKC&quot;, &quot;NFKD&quot;}): Form of normalization applied to</span>
+<span class="sd">            unicode characters. For example, an &quot;e&quot; with accute accent &quot;´&quot; can be</span>
+<span class="sd">            written as &quot;e´&quot; (canonical decomposition, &quot;NFD&quot;) or &quot;é&quot; (canonical</span>
+<span class="sd">            composition, &quot;NFC&quot;). Unicode can be normalized to NFC form</span>
+<span class="sd">            without any change in meaning, so it&#39;s usually a safe bet. If &quot;NFKC&quot;,</span>
+<span class="sd">            additional normalizations are applied that can change characters&#39; meanings,</span>
+<span class="sd">            e.g. ellipsis characters are replaced with three periods.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="normalize_whitespace"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.normalize_whitespace">[docs]</a><span class="k">def</span> <span class="nf">normalize_whitespace</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given ``text``, replace one or more spacings with a single space, and one</span>
 <span class="sd">    or more linebreaks with a single newline. Also strip leading/trailing whitespace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_NONBREAKING_SPACE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
@@ -75,9 +96,9 @@
     <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="unpack_contractions"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.unpack_contractions">[docs]</a><span class="k">def</span> <span class="nf">unpack_contractions</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<div class="viewcode-block" id="unpack_contractions"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.unpack_contractions">[docs]</a><span class="k">def</span> <span class="nf">unpack_contractions</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Replace *English* contractions in ``text`` str with their unshortened forms.</span>
+<span class="sd">    Replace *English* contractions in ``text`` with their unshortened forms.</span>
 <span class="sd">    N.B. The &quot;&#39;d&quot; and &quot;&#39;s&quot; forms are ambiguous (had/would, is/has/possessive),</span>
 <span class="sd">    so are left as-is.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -108,38 +129,38 @@
     <span class="k">return</span> <span class="n">text</span></div>
 
 
-<div class="viewcode-block" id="replace_urls"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_urls">[docs]</a><span class="k">def</span> <span class="nf">replace_urls</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*URL*&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all URLs in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="replace_urls"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.replace_urls">[docs]</a><span class="k">def</span> <span class="nf">replace_urls</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*URL*&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace all URLs in ``text`` with ``replace_with``.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_URL</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
         <span class="n">replace_with</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_SHORT_URL</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="replace_emails"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_emails">[docs]</a><span class="k">def</span> <span class="nf">replace_emails</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*EMAIL*&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all emails in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="replace_emails"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.replace_emails">[docs]</a><span class="k">def</span> <span class="nf">replace_emails</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*EMAIL*&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace all emails in ``text`` with ``replace_with``.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_EMAIL</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="replace_phone_numbers"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_phone_numbers">[docs]</a><span class="k">def</span> <span class="nf">replace_phone_numbers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*PHONE*&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all phone numbers in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="replace_phone_numbers"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.replace_phone_numbers">[docs]</a><span class="k">def</span> <span class="nf">replace_phone_numbers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*PHONE*&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace all phone numbers in ``text`` with ``replace_with``.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_PHONE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="replace_numbers"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_numbers">[docs]</a><span class="k">def</span> <span class="nf">replace_numbers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*NUMBER*&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace all numbers in ``text`` str with ``replace_with`` str.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="replace_numbers"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.replace_numbers">[docs]</a><span class="k">def</span> <span class="nf">replace_numbers</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="s2">&quot;*NUMBER*&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace all numbers in ``text`` with ``replace_with``.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_NUMBERS</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="replace_currency_symbols"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.replace_currency_symbols">[docs]</a><span class="k">def</span> <span class="nf">replace_currency_symbols</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="replace_currency_symbols"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.replace_currency_symbols">[docs]</a><span class="k">def</span> <span class="nf">replace_currency_symbols</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">replace_with</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Replace all currency symbols in ``text`` str with string specified by ``replace_with`` str.</span>
+<span class="sd">    Replace all currency symbols in ``text`` with string specified by ``replace_with``.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        text (str): raw text</span>
-<span class="sd">        replace_with (str): if None (default), replace symbols with</span>
-<span class="sd">            their standard 3-letter abbreviations (e.g. &#39;$&#39; with &#39;USD&#39;, &#39;£&#39; with &#39;GBP&#39;);</span>
+<span class="sd">        text (str): Raw text.</span>
+<span class="sd">        replace_with (str): If None (default), replace symbols with</span>
+<span class="sd">            their standard 3-letter abbreviations (e.g. &quot;$&quot; with &quot;USD&quot;, &quot;£&quot; with &quot;GBP&quot;);</span>
 <span class="sd">            otherwise, pass in a string with which to replace all symbols</span>
-<span class="sd">            (e.g. &quot;*CURRENCY*&quot;)</span>
+<span class="sd">            (e.g. &quot;*CURRENCY*&quot;).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str</span>
@@ -152,15 +173,15 @@
         <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_CURRENCY</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">replace_with</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="remove_punct"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.remove_punct">[docs]</a><span class="k">def</span> <span class="nf">remove_punct</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">marks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_punct"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.remove_punct">[docs]</a><span class="k">def</span> <span class="nf">remove_punct</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">marks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove punctuation from ``text`` by replacing all instances of ``marks``</span>
 <span class="sd">    with whitespace.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        text (str): raw text</span>
+<span class="sd">        text (str): Raw text.</span>
 <span class="sd">        marks (str): If specified, remove only the characters in this string,</span>
-<span class="sd">            e.g. ``marks=&#39;,;:&#39;`` removes commas, semi-colons, and colons.</span>
+<span class="sd">            e.g. ``marks=&quot;,;:&quot;`` removes commas, semi-colons, and colons.</span>
 <span class="sd">            Otherwise, all punctuation marks are removed.</span>
 
 <span class="sd">    Returns:</span>
@@ -177,24 +198,24 @@
         <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">PUNCT_TRANSLATE_UNICODE</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="remove_accents"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.remove_accents">[docs]</a><span class="k">def</span> <span class="nf">remove_accents</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;unicode&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_accents"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.remove_accents">[docs]</a><span class="k">def</span> <span class="nf">remove_accents</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;unicode&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove accents from any accented unicode characters in ``text`` str, either by</span>
+<span class="sd">    Remove accents from any accented unicode characters in ``text``, either by</span>
 <span class="sd">    transforming them into ascii equivalents or removing them entirely.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        text (str): raw text</span>
-<span class="sd">        method ({&#39;unicode&#39;, &#39;ascii&#39;}): if &#39;unicode&#39;, remove accented</span>
-<span class="sd">            char for any unicode symbol with a direct ASCII equivalent; if &#39;ascii&#39;,</span>
-<span class="sd">            remove accented char for any unicode symbol</span>
+<span class="sd">        text (str): Raw text.</span>
+<span class="sd">        method ({&quot;unicode&quot;, &quot;ascii&quot;}): If &quot;unicode&quot;, remove accented char</span>
+<span class="sd">            for any unicode symbol with a direct ASCII equivalent; if &quot;ascii&quot;,</span>
+<span class="sd">            remove accented char for any unicode symbol.</span>
 
-<span class="sd">            NB: the &#39;ascii&#39; method is notably faster than &#39;unicode&#39;, but less good</span>
+<span class="sd">            Note: The &quot;ascii&quot; method is notably faster than &quot;unicode&quot;, but less good.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: if ``method`` is not in {&#39;unicode&#39;, &#39;ascii&#39;}</span>
+<span class="sd">        ValueError: If ``method`` is not in {&quot;unicode&quot;, &quot;ascii&quot;}.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;unicode&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -213,9 +234,10 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="preprocess_text"><a class="viewcode-back" href="../../api_reference.html#textacy.preprocess.preprocess_text">[docs]</a><span class="k">def</span> <span class="nf">preprocess_text</span><span class="p">(</span>
+<div class="viewcode-block" id="preprocess_text"><a class="viewcode-back" href="../../api_reference/text_processing.html#textacy.preprocess.preprocess_text">[docs]</a><span class="k">def</span> <span class="nf">preprocess_text</span><span class="p">(</span>
     <span class="n">text</span><span class="p">,</span>
     <span class="n">fix_unicode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">normalize_unicode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">lowercase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">no_urls</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">no_emails</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -227,27 +249,29 @@
     <span class="n">no_accents</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Normalize various aspects of a raw text doc before parsing it with Spacy.</span>
+<span class="sd">    Normalize various aspects of raw text before parsing it with spaCy.</span>
 <span class="sd">    A convenience function for applying all other preprocessing functions in one go.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        text (str): raw text to preprocess</span>
-<span class="sd">        fix_unicode (bool): if True, fix &quot;broken&quot; unicode such as</span>
-<span class="sd">            mojibake and garbled HTML entities</span>
-<span class="sd">        lowercase (bool): if True, all text is lower-cased</span>
-<span class="sd">        no_urls (bool): if True, replace all URL strings with &#39;*URL*&#39;</span>
-<span class="sd">        no_emails (bool): if True, replace all email strings with &#39;*EMAIL*&#39;</span>
-<span class="sd">        no_phone_numbers (bool): if True, replace all phone number strings</span>
-<span class="sd">            with &#39;*PHONE*&#39;</span>
-<span class="sd">        no_numbers (bool): if True, replace all number-like strings</span>
-<span class="sd">            with &#39;*NUMBER*&#39;</span>
-<span class="sd">        no_currency_symbols (bool): if True, replace all currency symbols</span>
+<span class="sd">        text (str): Raw text to preprocess.</span>
+<span class="sd">        fix_unicode (bool): If True, fix &quot;broken&quot; unicode such as</span>
+<span class="sd">            mojibake and garbled HTML entities.</span>
+<span class="sd">        normalize_unicode (bool): If True, normalize unicode characters in text</span>
+<span class="sd">            into canonical form.</span>
+<span class="sd">        lowercase (bool): If True, all text is lower-cased</span>
+<span class="sd">        no_urls (bool): If True, replace all URL strings with &quot;*URL*&quot;</span>
+<span class="sd">        no_emails (bool): If True, replace all email strings with &quot;*EMAIL*&quot;</span>
+<span class="sd">        no_phone_numbers (bool): If True, replace all phone number strings</span>
+<span class="sd">            with &quot;*PHONE*&quot;</span>
+<span class="sd">        no_numbers (bool): If True, replace all number-like strings</span>
+<span class="sd">            with &quot;*NUMBER*&quot;</span>
+<span class="sd">        no_currency_symbols (bool): If True, replace all currency symbols</span>
 <span class="sd">            with their standard 3-letter abbreviations</span>
-<span class="sd">        no_punct (bool): if True, remove all punctuation (replace with</span>
+<span class="sd">        no_punct (bool): If True, remove all punctuation (replace with</span>
 <span class="sd">            empty string)</span>
-<span class="sd">        no_contractions (bool): if True, replace *English* contractions</span>
+<span class="sd">        no_contractions (bool): If True, replace *English* contractions</span>
 <span class="sd">            with their unshortened forms</span>
-<span class="sd">        no_accents (bool): if True, replace all accented characters</span>
+<span class="sd">        no_accents (bool): If True, replace all accented characters</span>
 <span class="sd">            with unaccented versions</span>
 
 <span class="sd">    Returns:</span>
@@ -259,6 +283,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fix_unicode</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">fix_bad_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;NFC&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">normalize_unicode</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">normalize_unicode</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="s2">&quot;NFC&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">no_urls</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">replace_urls</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">no_emails</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -316,8 +342,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -331,10 +357,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -348,7 +374,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

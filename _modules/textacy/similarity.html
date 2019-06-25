@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.similarity &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.similarity &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -62,7 +62,7 @@
 <span class="n">RE_NONWORDCHARS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\W+&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="word_movers"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word_movers">[docs]</a><span class="k">def</span> <span class="nf">word_movers</span><span class="p">(</span><span class="n">doc1</span><span class="p">,</span> <span class="n">doc2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="word_movers"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.word_movers">[docs]</a><span class="k">def</span> <span class="nf">word_movers</span><span class="p">(</span><span class="n">doc1</span><span class="p">,</span> <span class="n">doc2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the semantic similarity between two documents using Word Movers</span>
 <span class="sd">    Distance.</span>
@@ -70,7 +70,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        doc1 (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        doc2 (:class:`spacy.tokens.Doc`)</span>
-<span class="sd">        metric ({&#39;cosine&#39;, &#39;euclidean&#39;, &#39;l1&#39;, &#39;l2&#39;, &#39;manhattan&#39;})</span>
+<span class="sd">        metric ({&quot;cosine&quot;, &quot;euclidean&quot;, &quot;l1&quot;, &quot;l2&quot;, &quot;manhattan&quot;})</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        float: Similarity between ``doc1`` and ``doc2`` in the interval [0.0, 1.0],</span>
@@ -117,7 +117,7 @@
     <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">emd</span><span class="p">(</span><span class="n">vec1</span><span class="p">,</span> <span class="n">vec2</span><span class="p">,</span> <span class="n">distance_mat</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="word2vec"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.word2vec">[docs]</a><span class="k">def</span> <span class="nf">word2vec</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">):</span>
+<div class="viewcode-block" id="word2vec"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.word2vec">[docs]</a><span class="k">def</span> <span class="nf">word2vec</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the semantic similarity between one spacy Doc, Span, Token,</span>
 <span class="sd">    or Lexeme and another like object using the cosine distance between the</span>
@@ -128,13 +128,13 @@
 <span class="sd">        obj2 (:class:`spacy.tokens.Doc`, :class:`spacy.tokens.Span`, :class:`spacy.tokens.Token`, or ``spacy.Lexeme``)</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">        float: similarity between ``obj1`` and ``obj2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: Similarity between ``obj1`` and ``obj2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">obj1</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="jaccard"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.jaccard">[docs]</a><span class="k">def</span> <span class="nf">jaccard</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">fuzzy_match</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">match_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+<div class="viewcode-block" id="jaccard"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.jaccard">[docs]</a><span class="k">def</span> <span class="nf">jaccard</span><span class="p">(</span><span class="n">obj1</span><span class="p">,</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">fuzzy_match</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">match_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the semantic similarity between two strings or sequences of strings</span>
 <span class="sd">    using Jaccard distance, with optional fuzzy matching of not-identical pairs</span>
@@ -150,7 +150,7 @@
 <span class="sd">            with a score &gt;= this value will be considered matches</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between ``obj1`` and ``obj2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: Similarity between ``obj1`` and ``obj2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings or sequences</span>
 <span class="sd">        of strings</span>
 
@@ -184,7 +184,7 @@
     <span class="k">return</span> <span class="n">intersection</span> <span class="o">/</span> <span class="n">union</span></div>
 
 
-<div class="viewcode-block" id="hamming"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.hamming">[docs]</a><span class="k">def</span> <span class="nf">hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+<div class="viewcode-block" id="hamming"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.hamming">[docs]</a><span class="k">def</span> <span class="nf">hamming</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the similarity between two strings using Hamming distance, which</span>
 <span class="sd">    simply gives the number of characters in the strings that are different i.e.</span>
@@ -195,7 +195,7 @@
 <span class="sd">        str2 (str)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: Similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings</span>
 
 <span class="sd">    Note:</span>
@@ -218,7 +218,7 @@
     <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span></div>
 
 
-<div class="viewcode-block" id="levenshtein"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.levenshtein">[docs]</a><span class="k">def</span> <span class="nf">levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+<div class="viewcode-block" id="levenshtein"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.levenshtein">[docs]</a><span class="k">def</span> <span class="nf">levenshtein</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the similarity between two strings using Levenshtein distance, which</span>
 <span class="sd">    gives the minimum number of character insertions, deletions, and substitutions</span>
@@ -239,7 +239,7 @@
     <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">distance</span></div>
 
 
-<div class="viewcode-block" id="jaro_winkler"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.jaro_winkler">[docs]</a><span class="k">def</span> <span class="nf">jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<div class="viewcode-block" id="jaro_winkler"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.jaro_winkler">[docs]</a><span class="k">def</span> <span class="nf">jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure the similarity between two strings using Jaro-Winkler similarity</span>
 <span class="sd">    metric, a modification of Jaro metric giving more weight to a shared prefix.</span>
@@ -247,17 +247,17 @@
 <span class="sd">    Args:</span>
 <span class="sd">        str1 (str)</span>
 <span class="sd">        str2 (str)</span>
-<span class="sd">        prefix_weight (float): the inverse value of common prefix length needed</span>
+<span class="sd">        prefix_weight (float): The inverse value of common prefix length needed</span>
 <span class="sd">            to consider the strings identical</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: Similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_jaro_winkler</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">prefix_weight</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="token_sort_ratio"><a class="viewcode-back" href="../../api_reference.html#textacy.similarity.token_sort_ratio">[docs]</a><span class="k">def</span> <span class="nf">token_sort_ratio</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+<div class="viewcode-block" id="token_sort_ratio"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.similarity.token_sort_ratio">[docs]</a><span class="k">def</span> <span class="nf">token_sort_ratio</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Measure of similarity between two strings based on minimal edit distance,</span>
 <span class="sd">    where ordering of words in each string is normalized before comparing.</span>
@@ -267,7 +267,7 @@
 <span class="sd">        str2 (str)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        float: similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
+<span class="sd">        float: Similarity between ``str1`` and ``str2`` in the interval [0.0, 1.0],</span>
 <span class="sd">        where larger values correspond to more similar strings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">str1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">str2</span><span class="p">:</span>
@@ -327,8 +327,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -342,10 +342,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -359,7 +359,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.io.spacy &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.io.spacy &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -46,11 +46,11 @@
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">cache</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compat</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">open_sesame</span>
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="k">import</span> <span class="n">deprecated</span>
 
 
-<div class="viewcode-block" id="read_spacy_docs"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.spacy.read_spacy_docs">[docs]</a><span class="k">def</span> <span class="nf">read_spacy_docs</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="read_spacy_docs"><a class="viewcode-back" href="../../../api_reference/io.html#textacy.io.spacy.read_spacy_docs">[docs]</a><span class="k">def</span> <span class="nf">read_spacy_docs</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the contents of a file at ``filepath``, written either in pickle or binary</span>
 <span class="sd">    format.</span>
@@ -158,7 +158,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="write_spacy_docs"><a class="viewcode-back" href="../../../api_reference.html#textacy.io.spacy.write_spacy_docs">[docs]</a><span class="k">def</span> <span class="nf">write_spacy_docs</span><span class="p">(</span>
+<div class="viewcode-block" id="write_spacy_docs"><a class="viewcode-back" href="../../../api_reference/io.html#textacy.io.spacy.write_spacy_docs">[docs]</a><span class="k">def</span> <span class="nf">write_spacy_docs</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">make_dirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;tensor&quot;</span><span class="p">,),</span> <span class="n">include_tensor</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -200,7 +200,7 @@
 <span class="sd">        ValueError: if format is not &quot;pickle&quot; or &quot;binary&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">include_tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">deprecated</span><span class="p">(</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">deprecated</span><span class="p">(</span>
             <span class="s2">&quot;Use `exclude=(&#39;tensor&#39;,)` instead of `include_tensor=True`, since &quot;</span>
             <span class="s2">&quot;spacy has converged on this standard for usage.&quot;</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="s2">&quot;once&quot;</span><span class="p">,</span>
@@ -260,8 +260,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -275,10 +275,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -292,7 +292,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

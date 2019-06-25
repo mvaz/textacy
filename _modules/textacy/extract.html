@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.extract &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.extract &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -47,15 +47,17 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">cytoolz</span> <span class="k">import</span> <span class="n">itertoolz</span>
 <span class="kn">from</span> <span class="nn">spacy.parts_of_speech</span> <span class="k">import</span> <span class="n">CONJ</span><span class="p">,</span> <span class="n">DET</span><span class="p">,</span> <span class="n">NOUN</span><span class="p">,</span> <span class="n">VERB</span>
+<span class="kn">from</span> <span class="nn">spacy.matcher</span> <span class="k">import</span> <span class="n">Matcher</span>
 <span class="kn">from</span> <span class="nn">spacy.tokens</span> <span class="k">import</span> <span class="n">Span</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compat</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">constants</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">text_utils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">.spacier</span> <span class="k">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">spacy_utils</span>
 
 
-<div class="viewcode-block" id="words"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.words">[docs]</a><span class="k">def</span> <span class="nf">words</span><span class="p">(</span>
+<div class="viewcode-block" id="words"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.words">[docs]</a><span class="k">def</span> <span class="nf">words</span><span class="p">(</span>
     <span class="n">doc</span><span class="p">,</span>
     <span class="n">filter_stops</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">filter_punct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -70,20 +72,20 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc (:class:`spacy.tokens.Doc` or :class:`spacy.tokens.Span`)</span>
-<span class="sd">        filter_stops (bool): if True, remove stop words from word list</span>
-<span class="sd">        filter_punct (bool): if True, remove punctuation from word list</span>
-<span class="sd">        filter_nums (bool): if True, remove number-like words (e.g. 10, &#39;ten&#39;)</span>
-<span class="sd">            from word list</span>
-<span class="sd">        include_pos (str or Set[str]): remove words whose part-of-speech tag</span>
-<span class="sd">            IS NOT included in this param</span>
-<span class="sd">        exclude_pos (str or Set[str]): remove words whose part-of-speech tag</span>
-<span class="sd">            IS in the specified tags</span>
-<span class="sd">        min_freq (int): remove words that occur in ``doc`` fewer than</span>
-<span class="sd">            ``min_freq`` times</span>
+<span class="sd">        filter_stops (bool): If True, remove stop words from word list.</span>
+<span class="sd">        filter_punct (bool): If True, remove punctuation from word list.</span>
+<span class="sd">        filter_nums (bool): If True, remove number-like words (e.g. 10, &quot;ten&quot;)</span>
+<span class="sd">            from word list.</span>
+<span class="sd">        include_pos (str or Set[str]): Remove words whose part-of-speech tag</span>
+<span class="sd">            IS NOT included in this param.</span>
+<span class="sd">        exclude_pos (str or Set[str]): Remove words whose part-of-speech tag</span>
+<span class="sd">            IS in the specified tags.</span>
+<span class="sd">        min_freq (int): Remove words that occur in ``doc`` fewer than</span>
+<span class="sd">            ``min_freq`` times.</span>
 
 <span class="sd">    Yields:</span>
-<span class="sd">        :class:`spacy.tokens.Token`: the next token from ``doc`` passing specified filters</span>
-<span class="sd">        in order of appearance in the document</span>
+<span class="sd">        :class:`spacy.tokens.Token`: Next token from ``doc`` passing specified filters</span>
+<span class="sd">        in order of appearance in the document.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        TypeError: if ``include_pos`` or ``exclude_pos`` is not a str, a set of str,</span>
@@ -129,7 +131,7 @@
         <span class="k">yield</span> <span class="n">word</span></div>
 
 
-<div class="viewcode-block" id="ngrams"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.ngrams">[docs]</a><span class="k">def</span> <span class="nf">ngrams</span><span class="p">(</span>
+<div class="viewcode-block" id="ngrams"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.ngrams">[docs]</a><span class="k">def</span> <span class="nf">ngrams</span><span class="p">(</span>
     <span class="n">doc</span><span class="p">,</span>
     <span class="n">n</span><span class="p">,</span>
     <span class="n">filter_stops</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -225,7 +227,7 @@
         <span class="k">yield</span> <span class="n">ngram</span></div>
 
 
-<div class="viewcode-block" id="entities"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.entities">[docs]</a><span class="k">def</span> <span class="nf">entities</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">include_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="entities"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.entities">[docs]</a><span class="k">def</span> <span class="nf">entities</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">include_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract an ordered sequence of named entities (PERSON, ORG, LOC, etc.) from</span>
 <span class="sd">    a ``Doc``, optionally filtering by entity types and frequencies.</span>
@@ -321,7 +323,7 @@
         <span class="p">)</span>
 
 
-<div class="viewcode-block" id="noun_chunks"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.noun_chunks">[docs]</a><span class="k">def</span> <span class="nf">noun_chunks</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="noun_chunks"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.noun_chunks">[docs]</a><span class="k">def</span> <span class="nf">noun_chunks</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">drop_determiners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract an ordered sequence of noun chunks from a spacy-parsed doc, optionally</span>
 <span class="sd">    filtering by frequency and dropping leading determiners.</span>
@@ -349,7 +351,7 @@
         <span class="k">yield</span> <span class="n">nc</span></div>
 
 
-<div class="viewcode-block" id="pos_regex_matches"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.pos_regex_matches">[docs]</a><span class="k">def</span> <span class="nf">pos_regex_matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+<div class="viewcode-block" id="pos_regex_matches"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.pos_regex_matches">[docs]</a><span class="k">def</span> <span class="nf">pos_regex_matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract sequences of consecutive tokens from a spacy-parsed doc whose</span>
 <span class="sd">    part-of-speech tags match the specified regex pattern.</span>
@@ -373,7 +375,17 @@
 <span class="sd">    Yields:</span>
 <span class="sd">        :class:`spacy.tokens.Span`: the next span of consecutive tokens from ``doc`` whose</span>
 <span class="sd">        parts-of-speech match ``pattern``, in order of apperance</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        *DEPRECATED!* For similar but more powerful and performant functionality,</span>
+<span class="sd">        use :func:`textacy.extract.matches()` instead.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">deprecated</span><span class="p">(</span>
+        <span class="s2">&quot;`pos_regex_matches()` has been deprecated! &quot;</span>
+        <span class="s2">&quot;for similar but more powerful and performant functionality, &quot;</span>
+        <span class="s2">&quot;use `textacy.extract.matches()` instead.&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;once&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="c1"># standardize and transform the regular expression pattern...</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&lt;([A-Z]+)\|([A-Z]+)&gt;&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;( (\1|\2))&quot;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
@@ -385,7 +397,132 @@
         <span class="k">yield</span> <span class="n">doc</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="p">:</span> <span class="n">tags</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)]</span></div>
 
 
-<div class="viewcode-block" id="subject_verb_object_triples"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.subject_verb_object_triples">[docs]</a><span class="k">def</span> <span class="nf">subject_verb_object_triples</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+<div class="viewcode-block" id="matches"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.matches">[docs]</a><span class="k">def</span> <span class="nf">matches</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">on_match</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract ``Span`` s from a ``Doc`` matching one or more patterns</span>
+<span class="sd">    of per-token attr:value pairs, with optional quantity qualifiers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
+<span class="sd">        patterns (str or List[str] or List[dict] or List[List[dict]]):</span>
+<span class="sd">            One or multiple patterns to match against ``doc``</span>
+<span class="sd">            using a :class:`spacy.matcher.Matcher`.</span>
+
+<span class="sd">            If List[dict] or List[List[dict]], each pattern is specified</span>
+<span class="sd">            as attr: value pairs per token, with optional quantity qualifiers:</span>
+
+<span class="sd">            * ``[{&quot;POS&quot;: &quot;NOUN&quot;}]`` matches singular or plural nouns,</span>
+<span class="sd">              like &quot;friend&quot; or &quot;enemies&quot;</span>
+<span class="sd">            * ``[{&quot;POS&quot;: &quot;PREP&quot;}, {&quot;POS&quot;: &quot;DET&quot;, &quot;OP&quot;: &quot;?&quot;}, {&quot;POS&quot;: &quot;ADJ&quot;, &quot;OP&quot;: &quot;?&quot;}, {&quot;POS&quot;: &quot;NOUN&quot;, &quot;OP&quot;: &quot;+&quot;}]``</span>
+<span class="sd">              matches prepositional phrases, like &quot;in the future&quot; or &quot;from the distant past&quot;</span>
+<span class="sd">            * ``[{&quot;IS_DIGIT&quot;: True}, {&quot;TAG&quot;: &quot;NNS&quot;}]`` matches numbered plural nouns,</span>
+<span class="sd">              like &quot;60 seconds&quot; or &quot;2 beers&quot;</span>
+<span class="sd">            * ``[{&quot;POS&quot;: &quot;PROPN&quot;, &quot;OP&quot;: &quot;+&quot;}, {}]`` matches proper nouns and</span>
+<span class="sd">              whatever word follows them, like &quot;Burton DeWilde yaaasss&quot;</span>
+
+<span class="sd">            If str or List[str], each pattern is specified as one or more</span>
+<span class="sd">            per-token patterns separated by whitespace where attribute, value,</span>
+<span class="sd">            and optional quantity qualifiers are delimited by colons. Note that</span>
+<span class="sd">            boolean and integer values have special syntax --- &quot;bool(val)&quot; and</span>
+<span class="sd">            &quot;int(val)&quot;, respectively --- and that wildcard tokens still need</span>
+<span class="sd">            a colon between the (empty) attribute and value strings.</span>
+
+<span class="sd">            * ``&quot;POS:NOUN&quot;`` matches singular or plural nouns</span>
+<span class="sd">            * ``&quot;POS:PREP POS:DET:? POS:ADJ:? POS:NOUN:+&quot;`` matches prepositional phrases</span>
+<span class="sd">            * ``&quot;IS_DIGIT:bool(True) TAG:NNS&quot;`` matches numbered plural nouns</span>
+<span class="sd">            * ``&quot;POS:PROPN:+ :&quot;`` matches proper nouns and whatever word follows them</span>
+
+<span class="sd">            Also note that these pattern strings don&#39;t support spaCy v2.1&#39;s</span>
+<span class="sd">            &quot;extended&quot; pattern syntax; if you need such complex patterns, it&#39;s</span>
+<span class="sd">            probably better to use a List[dict] or List[List[dict]], anyway.</span>
+
+<span class="sd">        on_match (callable): Callback function to act on matches.</span>
+<span class="sd">            Takes the arguments ``matcher``, ``doc``, ``i`` and ``matches``.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        :class:`spacy.tokens.Span`: Next matching ``Span`` in ``doc``,</span>
+<span class="sd">        in order of appearance</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError</span>
+<span class="sd">        ValueError</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * https://spacy.io/usage/rule-based-matching</span>
+<span class="sd">        * https://spacy.io/api/matcher</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">_make_pattern_from_string</span><span class="p">(</span><span class="n">patterns</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">compat</span><span class="o">.</span><span class="n">unicode_</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">):</span>
+            <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">_make_pattern_from_string</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">):</span>
+            <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">patterns</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">):</span>
+            <span class="k">pass</span>  <span class="c1"># already in the right format!</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;patterns=</span><span class="si">{}</span><span class="s2"> is invalid; values must be one of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">patterns</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="s2">&quot;List[str]&quot;</span><span class="p">,</span> <span class="s2">&quot;List[dict]&quot;</span><span class="p">,</span> <span class="s2">&quot;List[list[dict]]&quot;</span><span class="p">})</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;patterns=</span><span class="si">{}</span><span class="s2"> is invalid; values must be one of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">patterns</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="s2">&quot;List[str]&quot;</span><span class="p">,</span> <span class="s2">&quot;List[dict]&quot;</span><span class="p">,</span> <span class="s2">&quot;List[list[dict]]&quot;</span><span class="p">})</span>
+        <span class="p">)</span>
+    <span class="n">matcher</span> <span class="o">=</span> <span class="n">Matcher</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">vocab</span><span class="p">)</span>
+    <span class="n">matcher</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;match&quot;</span><span class="p">,</span> <span class="n">on_match</span><span class="p">,</span> <span class="o">*</span><span class="n">patterns</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">matcher</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">doc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">_make_pattern_from_string</span><span class="p">(</span><span class="n">patstr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        patstr (str)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[dict]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tokpatstr</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_MATCHER_TOKPAT_DELIM</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">patstr</span><span class="p">):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">tokpatstr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">attr_val</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">and</span> <span class="n">attr_val</span><span class="p">:</span>
+                <span class="c1"># handle special bool and int attribute values</span>
+                <span class="n">special_val</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">RE_MATCHER_SPECIAL_VAL</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">attr_val</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">special_val</span><span class="p">:</span>
+                    <span class="n">attr_val</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">special_val</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                <span class="n">tokpat</span> <span class="o">=</span> <span class="p">{</span><span class="n">attr</span><span class="p">:</span> <span class="n">attr_val</span><span class="p">}</span>
+            <span class="c1"># handle wildcard tokens</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tokpat</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># handle quantifier ops</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">op_val</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">op_val</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">MATCHER_VALID_OPS</span><span class="p">:</span>
+                    <span class="n">tokpat</span><span class="p">[</span><span class="s2">&quot;OP&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">op_val</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;op=</span><span class="si">{}</span><span class="s2"> invalid; valid choices are </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">op_val</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">MATCHER_VALID_OPS</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">pattern</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tokpat</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;pattern string &#39;</span><span class="si">{}</span><span class="s2">&#39; is invalid; &quot;</span>
+                <span class="s2">&quot;each element in a pattern string must contain an attribute, &quot;</span>
+                <span class="s2">&quot;a corresponding value, and an optional quantity qualifier, &quot;</span>
+                <span class="s2">&quot;delimited by colons, like attr:value:op&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">patstr</span><span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">pattern</span>
+
+
+<div class="viewcode-block" id="subject_verb_object_triples"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.subject_verb_object_triples">[docs]</a><span class="k">def</span> <span class="nf">subject_verb_object_triples</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract an ordered sequence of subject-verb-object (SVO) triples from a</span>
 <span class="sd">    spacy-parsed doc. Note that this only works for SVO languages.</span>
@@ -440,7 +577,7 @@
                     <span class="k">yield</span> <span class="p">(</span><span class="n">subj</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="acronyms_and_definitions"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.acronyms_and_definitions">[docs]</a><span class="k">def</span> <span class="nf">acronyms_and_definitions</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">known_acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="acronyms_and_definitions"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.acronyms_and_definitions">[docs]</a><span class="k">def</span> <span class="nf">acronyms_and_definitions</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">known_acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract a collection of acronyms and their most likely definitions, if available,</span>
 <span class="sd">    from a spacy-parsed doc. If multiple definitions are found for a given acronym,</span>
@@ -691,7 +828,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">definition</span><span class="p">,</span> <span class="n">confidence</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="semistructured_statements"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.semistructured_statements">[docs]</a><span class="k">def</span> <span class="nf">semistructured_statements</span><span class="p">(</span>
+<div class="viewcode-block" id="semistructured_statements"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.semistructured_statements">[docs]</a><span class="k">def</span> <span class="nf">semistructured_statements</span><span class="p">(</span>
     <span class="n">doc</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="s2">&quot;be&quot;</span><span class="p">,</span> <span class="n">ignore_entity_case</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_n_words</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_n_words</span><span class="o">=</span><span class="mi">20</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -827,7 +964,7 @@
             <span class="k">yield</span> <span class="p">(</span><span class="n">the_entity</span><span class="p">,</span> <span class="n">the_cue</span><span class="p">,</span> <span class="n">the_fragment</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="direct_quotations"><a class="viewcode-back" href="../../api_reference.html#textacy.extract.direct_quotations">[docs]</a><span class="k">def</span> <span class="nf">direct_quotations</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+<div class="viewcode-block" id="direct_quotations"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.extract.direct_quotations">[docs]</a><span class="k">def</span> <span class="nf">direct_quotations</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Baseline, not-great attempt at direction quotation extraction (no indirect</span>
 <span class="sd">    or mixed quotations) using rules and patterns. English only.</span>
@@ -959,8 +1096,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -974,10 +1111,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -991,7 +1128,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

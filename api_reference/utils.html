@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Utilities &#8212; textacy 0.7.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Miscellany" href="misc.html" />
+    <link rel="prev" title="Visualization" href="viz.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-textacy.lang_utils">
+<span id="utilities"></span><span id="ref-api-reference-utils"></span><h1>Utilities<a class="headerlink" href="#module-textacy.lang_utils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="language-identification">
+<h2>Language Identification<a class="headerlink" href="#language-identification" title="Permalink to this headline">¶</a></h2>
+<p>Functionality for identifying the language of a text, using a model inspired by
+Google’s Compact Language Detector v3 (<a class="reference external" href="https://github.com/google/cld3">https://github.com/google/cld3</a>) and
+implemented with <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code>.</p>
+<div class="section" id="model">
+<h3>Model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h3>
+<p>Character unigrams, bigrams, and trigrams are extracted from input text, and
+their frequencies of occurence within the text are counted. The full set of ngrams
+are then hashed into a 4096-dimensional feature vector with values given by
+the L2 norm of the counts. These features are passed into a Multi-layer Perceptron
+with a single hidden layer of 512 rectified linear units and a softmax output layer
+giving probabilities for ~130 different languages as ISO 639-1 language codes.</p>
+<p>Technically, the model was implemented as a <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code>
+with two steps: a <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.feature_extraction.text.HashingVectorizer</span></code>
+for vectorizing input texts and a <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.neural_network.MLPClassifier</span></code>
+for multi-class language classification.</p>
+</div>
+<div class="section" id="dataset">
+<h3>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h3>
+<p>The pipeline was trained on a randomized, stratified subset of ~1.5M texts
+drawn from several sources:</p>
+<ul class="simple">
+<li><p><strong>Tatoeba:</strong> A crowd-sourced collection of ~5M sentences and their translations
+into many languages. Style is relatively informal; subject matter is a variety
+of everyday things and goings-on.
+Source: <a class="reference external" href="https://tatoeba.org/eng/downloads">https://tatoeba.org/eng/downloads</a>.</p></li>
+<li><p><strong>Leipzig Corpora:</strong> A collection of corpora for many languages in the same format
+and pulling from comparable sources – specifically, 10k Wikipedia articles from
+official database dumps and 10k news articles from either RSS feeds or web scrapes.
+Only the most recently updated version was used, when available. Style is
+relatively formal; subject matter is a variety of notable things and goings-on.
+Source: <a class="reference external" href="http://wortschatz.uni-leipzig.de/en/download">http://wortschatz.uni-leipzig.de/en/download</a></p></li>
+<li><p><strong>UDHR:</strong> The UN’s Universal Declaration of Human Rights document, translated
+into hundreds of languages and split into paragraphs. Style is formal;
+subject matter is fundamental human rights to be universally protected.
+Source: <a class="reference external" href="https://unicode.org/udhr/index.html">https://unicode.org/udhr/index.html</a></p></li>
+<li><p><strong>Twitter:</strong> A collection of ~1.5k tweets in each of ~70 languages, posted in
+July 2014, with languages assigned through a combination of models and human
+annotators. Style is informal; subject matter is whatever Twitter was going on
+about back then, who could say.
+Source: <a class="reference external" href="https://blog.twitter.com/engineering/en_us/a/2015/evaluating-language-identification-performance.html">https://blog.twitter.com/engineering/en_us/a/2015/evaluating-language-identification-performance.html</a></p></li>
+</ul>
+<dl class="class">
+<dt id="textacy.lang_utils.LangIdentifier">
+<em class="property">class </em><code class="sig-prename descclassname">textacy.lang_utils.</code><code class="sig-name descname">LangIdentifier</code><span class="sig-paren">(</span><em class="sig-param">data_dir='/home/travis/virtualenv/python3.6.3/lib/python3.6/site-packages/textacy-0.7.1-py3.6.egg/textacy/data/lang_identifier'</em>, <em class="sig-param">max_text_len=1000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/lang_utils.html#LangIdentifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.lang_utils.LangIdentifier" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </p></li>
+<li><p><strong>max_text_len</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="textacy.lang_utils.LangIdentifier.pipeline">
+<code class="sig-name descname">pipeline</code><a class="headerlink" href="#textacy.lang_utils.LangIdentifier.pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="textacy.lang_utils.LangIdentifier.download">
+<code class="sig-name descname">download</code><span class="sig-paren">(</span><em class="sig-param">force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/lang_utils.html#LangIdentifier.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.lang_utils.LangIdentifier.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download the pipeline data as a Python version-specific compressed pickle file
+and save it to disk under the <code class="xref py py-attr docutils literal notranslate"><span class="pre">LangIdentifier.data_dir</span></code> directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, download the dataset, even if it already
+exists on disk under <code class="docutils literal notranslate"><span class="pre">data_dir</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="textacy.lang_utils.LangIdentifier.identify_lang">
+<code class="sig-name descname">identify_lang</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/lang_utils.html#LangIdentifier.identify_lang"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.lang_utils.LangIdentifier.identify_lang" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify the most probable language identified in <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2-letter language code of the most probable language.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="textacy.lang_utils.LangIdentifier.identify_topn_langs">
+<code class="sig-name descname">identify_topn_langs</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">topn=3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/lang_utils.html#LangIdentifier.identify_topn_langs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.lang_utils.LangIdentifier.identify_topn_langs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify the <code class="docutils literal notranslate"><span class="pre">topn</span></code> most probable languages identified in <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </p></li>
+<li><p><strong>topn</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2-letter language code and its probability
+for the <code class="docutils literal notranslate"><span class="pre">topn</span></code> most probable languages.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[Tuple[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)">float</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="textacy.lang_utils.LangIdentifier.init_pipeline">
+<code class="sig-name descname">init_pipeline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/lang_utils.html#LangIdentifier.init_pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.lang_utils.LangIdentifier.init_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a <em>new</em> language identification pipeline, overwriting any
+pre-trained pipeline loaded from disk under <code class="xref py py-attr docutils literal notranslate"><span class="pre">LangIdentifier.data_dir</span></code>.
+Must be trained on (text, lang) examples before use.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.lang_utils.identify_lang">
+<code class="sig-prename descclassname">textacy.lang_utils.</code><code class="sig-name descname">identify_lang</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="headerlink" href="#textacy.lang_utils.identify_lang" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify the most probable language identified in <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2-letter language code of the most probable language.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-textacy.cache"></span><div class="section" id="cache">
+<h2>Cache<a class="headerlink" href="#cache" title="Permalink to this headline">¶</a></h2>
+<p>Functions to load and cache language data and other NLP resources. Loading data
+from disk can be slow; let’s just do it once and forget about it. :)</p>
+<dl class="data">
+<dt id="textacy.cache.LRU_CACHE">
+<code class="sig-prename descclassname">textacy.cache.</code><code class="sig-name descname">LRU_CACHE</code><em class="property"> = LRUCache([], maxsize=2147483648, currsize=0)</em><a class="headerlink" href="#textacy.cache.LRU_CACHE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least Recently Used (LRU) cache for loaded data.</p>
+<p>The max cache size may be set by the <cite>TEXTACY_MAX_CACHE_SIZE</cite> environment variable,
+where the value must be an integer (in bytes). Otherwise, the max size is 2GB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">cachetools.LRUCache</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.clear">
+<code class="sig-prename descclassname">textacy.cache.</code><code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/cache.html#clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear textacy’s cache of loaded data.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.load_depechemood">
+<code class="sig-prename descclassname">textacy.cache.</code><code class="sig-name descname">load_depechemood</code><span class="sig-paren">(</span><em class="sig-param">data_dir=None</em>, <em class="sig-param">weighting='normfreq'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/cache.html#load_depechemood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_depechemood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load DepecheMood lexicon text file from disk, munge into nested dictionary
+for convenient lookup by lemma#POS. NB: English only!</p>
+<p>Each version of DepecheMood is built starting from word-by-document matrices
+either using raw frequencies (DepecheMood_freq.txt), normalized frequencies
+(DepecheMood_normfreq.txt) or tf-idf (DepecheMood_tfidf.txt). The files are
+tab-separated; each row contains one Lemma#PoS followed by the scores for the
+following emotions: AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Directory on disk where DepecheMood lexicon text fields,
+i.e. the location of the ‘DepecheMood_V1.0’ directory created when
+unzipping the DM dataset.</p></li>
+<li><p><strong>weighting</strong> (<em>{'freq'</em><em>, </em><em>'normfreq'</em><em>, </em><em>'tfidf'}</em>) – Type of word
+weighting used in building DepecheMood matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Top-level keys are Lemma#POS strings, values are nested dicts
+with emotion names as keys and weights as floats.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a>]</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Staiano, J., &amp; Guerini, M. (2014). “DepecheMood: a Lexicon for Emotion
+Analysis from Crowd-Annotated News”. Proceedings of ACL-2014. (arXiv:1405.1605)
+Data available at https://github.com/marcoguerini/DepecheMood/releases .</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="misc.html#textacy.lexicon_methods.download_depechemood" title="textacy.lexicon_methods.download_depechemood"><code class="xref py py-func docutils literal notranslate"><span class="pre">download_depechemood</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.load_hyphenator">
+<code class="sig-prename descclassname">textacy.cache.</code><code class="sig-name descname">load_hyphenator</code><span class="sig-paren">(</span><em class="sig-param">lang</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/cache.html#load_hyphenator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_hyphenator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an object that hyphenates words at valid points, as used in LaTex typesetting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lang</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Standard 2-letter language abbreviation. To get a list of
+valid values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyphen</span><span class="p">;</span> <span class="n">pyphen</span><span class="o">.</span><span class="n">LANGUAGES</span>
+</pre></div>
+</div>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pyphen.Pyphen()</span></code></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While hyphenation points always fall on syllable divisions,
+not all syllable divisions are valid hyphenation points. But it’s decent.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.cache.load_spacy_lang">
+<code class="sig-prename descclassname">textacy.cache.</code><code class="sig-name descname">load_spacy_lang</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">disable=None</em>, <em class="sig-param">allow_blank=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/cache.html#load_spacy_lang"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.cache.load_spacy_lang" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a spaCy <code class="docutils literal notranslate"><span class="pre">Language</span></code>: a shared vocabulary and language-specific data
+for tokenizing text, and (if available) model data and a processing pipeline
+containing a sequence of components for annotating a document.
+An LRU cache saves languages in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (str or <a class="reference external" href="https://docs.python.org/3.6/library/pathlib.html#pathlib.Path" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a>) – spaCy language to load.
+Could be a shortcut link, full package name, or path to model directory,
+or a 2-letter ISO language code for which spaCy has language data.</p></li>
+<li><p><strong>disable</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – <p>Names of pipeline components to disable, if any.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although spaCy’s API specifies this argument as a list,
+here we require a tuple. Pipelines are stored in the LRU cache
+with unique identifiers generated from the hash of the function
+name and args — and lists aren’t hashable.</p>
+</div>
+</p></li>
+<li><p><strong>allow_blank</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, allow loading of blank spaCy <code class="docutils literal notranslate"><span class="pre">Language</span></code> s;
+if False, raise an OSError/IOError if a full processing pipeline
+isn’t available. Note that spaCy <code class="docutils literal notranslate"><span class="pre">Doc</span></code> s produced by blank languages
+are missing key functionality, e.g. POS tags, entities, sentences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A loaded spaCy <code class="docutils literal notranslate"><span class="pre">Language</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">spacy.language.Language</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>OSError/IOError</strong> – </p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ImportError" title="(in Python v3.6)"><strong>ImportError</strong></a> – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://spacy.io/api/top-level#spacy.load">https://spacy.io/api/top-level#spacy.load</a></p></li>
+<li><p><a class="reference external" href="https://spacy.io/api/top-level#spacy.blank">https://spacy.io/api/top-level#spacy.blank</a></p></li>
+</ul>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="viz.html" title="Previous document">Visualization</a>
+        </li>
+        <li>
+          <a href="misc.html" title="Next document">Miscellany</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">textacy</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=chartbeat-labs&repo=textacy&type=watch&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="root.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="doc_and_corpus.html">Doc and Corpus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spacier.html">spaCy extensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="text_processing.html">Text (Pre-)Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="information_extraction.html">Information Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vsm_and_tm.html">Vectorization &amp; Topic Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="viz.html">Visualization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc.html">Miscellany</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="root.html">API Reference</a><ul>
+      <li>Previous: <a href="viz.html" title="previous chapter">Visualization</a></li>
+      <li>Next: <a href="misc.html" title="next chapter">Miscellany</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019 Chartbeat, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api_reference/utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

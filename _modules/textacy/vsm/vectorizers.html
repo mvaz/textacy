@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.vsm.vectorizers &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.vsm.vectorizers &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -64,12 +64,14 @@
 <span class="n">BM25_B</span> <span class="o">=</span> <span class="mf">0.75</span>
 
 
-<div class="viewcode-block" id="Vectorizer"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.Vectorizer">[docs]</a><span class="k">class</span> <span class="nc">Vectorizer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Vectorizer"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.Vectorizer">[docs]</a><span class="k">class</span> <span class="nc">Vectorizer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform one or more tokenized documents into a sparse document-term matrix</span>
 <span class="sd">    of shape (# docs, # unique terms), with flexibly weighted and normalized values.</span>
 
-<span class="sd">    Stream a corpus with metadata from disk::</span>
+<span class="sd">    Stream a corpus with metadata from disk:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; ds = textacy.datasets.CapitolWords()</span>
 <span class="sd">        &gt;&gt;&gt; records = ds.records(limit=1000)</span>
@@ -77,13 +79,15 @@
 <span class="sd">        &gt;&gt;&gt; corpus</span>
 <span class="sd">        Corpus(1000 docs; 538172 tokens)</span>
 
-<span class="sd">    Tokenize and vectorize the first 600 documents of this corpus::</span>
+<span class="sd">    Tokenize and vectorize the first 600 documents of this corpus:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs = (</span>
-<span class="sd">        ...     doc.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
+<span class="sd">        ...     doc._.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = Vectorizer(</span>
-<span class="sd">        ...     apply_idf=True, norm=&#39;l2&#39;,</span>
+<span class="sd">        ...     apply_idf=True, norm=&quot;l2&quot;,</span>
 <span class="sd">        ...     min_df=3, max_df=0.95)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = vectorizer.fit_transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix</span>
@@ -91,17 +95,21 @@
 <span class="sd">                with 69673 stored elements in Compressed Sparse Row format&gt;</span>
 
 <span class="sd">    Tokenize and vectorize the remaining 400 documents of the corpus, using only</span>
-<span class="sd">    the groups, terms, and weights learned in the previous step::</span>
+<span class="sd">    the groups, terms, and weights learned in the previous step:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs = (</span>
-<span class="sd">        ...     doc.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
+<span class="sd">        ...     doc._.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
 <span class="sd">        ...     for doc in corpus[600:])</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = vectorizer.transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix</span>
 <span class="sd">        &lt;400x4346 sparse matrix of type &#39;&lt;class &#39;numpy.float64&#39;&gt;&#39;</span>
 <span class="sd">                with 38756 stored elements in Compressed Sparse Row format&gt;</span>
 
-<span class="sd">    Inspect the terms associated with columns; they&#39;re sorted alphabetically::</span>
+<span class="sd">    Inspect the terms associated with columns; they&#39;re sorted alphabetically:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; vectorizer.terms_list[:5]</span>
 <span class="sd">        [&#39;&#39;, &#39;$&#39;, &#39;$ 1 million&#39;, &#39;$ 1.2 billion&#39;, &#39;$ 10 billion&#39;]</span>
@@ -110,15 +118,17 @@
 <span class="sd">    a named entity...)</span>
 
 <span class="sd">    If known in advance, limit the terms included in vectorized outputs</span>
-<span class="sd">    to a particular set of values::</span>
+<span class="sd">    to a particular set of values:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs = (</span>
-<span class="sd">        ...     doc.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
+<span class="sd">        ...     doc._.to_terms_list(ngrams=1, entities=True, as_strings=True)</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = Vectorizer(</span>
-<span class="sd">        ...     apply_idf=True, idf_type=&#39;smooth&#39;, norm=&#39;l2&#39;,</span>
+<span class="sd">        ...     apply_idf=True, idf_type=&quot;smooth&quot;, norm=&quot;l2&quot;,</span>
 <span class="sd">        ...     min_df=3, max_df=0.95,</span>
-<span class="sd">        ...     vocabulary_terms=[&#39;president&#39;, &#39;bill&#39;, &#39;unanimous&#39;, &#39;distinguished&#39;, &#39;american&#39;])</span>
+<span class="sd">        ...     vocabulary_terms=[&quot;president&quot;, &quot;bill&quot;, &quot;unanimous&quot;, &quot;distinguished&quot;, &quot;american&quot;])</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = vectorizer.fit_transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix</span>
 <span class="sd">        &lt;600x5 sparse matrix of type &#39;&lt;class &#39;numpy.float64&#39;&gt;&#39;</span>
@@ -127,11 +137,13 @@
 <span class="sd">        [&#39;american&#39;, &#39;bill&#39;, &#39;distinguished&#39;, &#39;president&#39;, &#39;unanimous&#39;]</span>
 
 <span class="sd">    Specify different weighting schemes to determine values in the matrix,</span>
-<span class="sd">    adding or customizing individual components, as desired::</span>
+<span class="sd">    adding or customizing individual components, as desired:</span>
 
-<span class="sd">        &gt;&gt;&gt; money_idx = vectorizer.vocabulary_terms[&#39;$&#39;]</span>
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; money_idx = vectorizer.vocabulary_terms[&quot;$&quot;]</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = Vectorizer(</span>
-<span class="sd">        ...     tf_type=&#39;linear&#39;, norm=None, min_df=3, max_df=0.95</span>
+<span class="sd">        ...     tf_type=&quot;linear&quot;, norm=None, min_df=3, max_df=0.95</span>
 <span class="sd">        ...     ).fit_transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; print(doc_term_matrix[0:7, money_idx].toarray())</span>
 <span class="sd">        [[0]</span>
@@ -142,7 +154,7 @@
 <span class="sd">         [0]</span>
 <span class="sd">         [2]]</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = Vectorizer(</span>
-<span class="sd">        ...     tf_type=&#39;sqrt&#39;, apply_dl=True, dl_type=&#39;sqrt&#39;, norm=None, min_df=3, max_df=0.95</span>
+<span class="sd">        ...     tf_type=&quot;sqrt&quot;, apply_dl=True, dl_type=&quot;sqrt&quot;, norm=None, min_df=3, max_df=0.95</span>
 <span class="sd">        ...     ).fit_transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; print(doc_term_matrix[0:7, money_idx].toarray())</span>
 <span class="sd">        [[0.        ]</span>
@@ -153,7 +165,7 @@
 <span class="sd">         [0.        ]</span>
 <span class="sd">         [0.11396058]]</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = Vectorizer(</span>
-<span class="sd">        ...     tf_type=&#39;bm25&#39;, apply_idf=True, idf_type=&#39;smooth&#39;, norm=None, min_df=3, max_df=0.95</span>
+<span class="sd">        ...     tf_type=&quot;bm25&quot;, apply_idf=True, idf_type=&quot;smooth&quot;, norm=None, min_df=3, max_df=0.95</span>
 <span class="sd">        ...     ).fit_transform(tokenized_docs)</span>
 <span class="sd">        &gt;&gt;&gt; print(doc_term_matrix[0:7, money_idx].toarray())</span>
 <span class="sd">        [[0.        ]</span>
@@ -166,7 +178,9 @@
 
 <span class="sd">    If you&#39;re not sure what&#39;s going on mathematically, :attr:`Vectorizer.weighting`</span>
 <span class="sd">    gives the formula being used to calculate weights, based on the parameters</span>
-<span class="sd">    set when initializing the vectorizer::</span>
+<span class="sd">    set when initializing the vectorizer:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; vectorizer.weighting</span>
 <span class="sd">        &#39;(tf * (k + 1)) / (k + tf) * log((n_docs + 1) / (df + 1)) + 1&#39;</span>
@@ -183,67 +197,67 @@
 <span class="sd">      i.e. value (i, j) in an output doc-term matrix corresponds to the number</span>
 <span class="sd">      of occurrences of term j in doc i. Terms appearing many times in a given</span>
 <span class="sd">      doc receive higher weights than less common terms.</span>
-<span class="sd">      Params: ``tf_type=&#39;linear&#39;, apply_idf=False, apply_dl=False``</span>
+<span class="sd">      Params: ``tf_type=&quot;linear&quot;, apply_idf=False, apply_dl=False``</span>
 <span class="sd">    - &quot;tfidf&quot;: Doc-specific, *local* tfs are multiplied by their corpus-wide,</span>
 <span class="sd">      *global* inverse document frequencies (idfs). Terms appearing in many docs</span>
 <span class="sd">      have higher document frequencies (dfs), correspondingly smaller idfs, and</span>
 <span class="sd">      in turn, lower weights.</span>
-<span class="sd">      Params: ``tf_type=&#39;linear&#39;, apply_idf=True, idf_type=&#39;smooth&#39;, apply_dl=False``</span>
+<span class="sd">      Params: ``tf_type=&quot;linear&quot;, apply_idf=True, idf_type=&quot;smooth&quot;, apply_dl=False``</span>
 <span class="sd">    - &quot;bm25&quot;: This scheme includes a local tf component that increases asymptotically,</span>
 <span class="sd">      so higher tfs have diminishing effects on the overall weight; a global idf</span>
 <span class="sd">      component that can go *negative* for terms that appear in a sufficiently</span>
 <span class="sd">      high proportion of docs; as well as a row-wise normalization that accounts for</span>
 <span class="sd">      document length, such that terms in shorter docs hit the tf asymptote sooner</span>
 <span class="sd">      than those in longer docs.</span>
-<span class="sd">      Params: ``tf_type=&#39;bm25&#39;, apply_idf=True, idf_type=&#39;bm25&#39;, apply_dl=True``</span>
+<span class="sd">      Params: ``tf_type=&quot;bm25&quot;, apply_idf=True, idf_type=&quot;bm25&quot;, apply_dl=True``</span>
 <span class="sd">    - &quot;binary&quot;: This weighting scheme simply replaces all non-zero tfs with 1,</span>
 <span class="sd">      indicating the presence or absence of a term in a particular doc. That&#39;s it.</span>
-<span class="sd">      Params: ``tf_type=&#39;binary&#39;, apply_idf=False, apply_dl=False``</span>
+<span class="sd">      Params: ``tf_type=&quot;binary&quot;, apply_idf=False, apply_dl=False``</span>
 
 <span class="sd">    Slightly altered versions of these &quot;standard&quot; weighting schemes are common,</span>
 <span class="sd">    and may have better behavior in general use cases:</span>
 
 <span class="sd">    - &quot;lucene-style tfidf&quot;: Adds a doc-length normalization to the usual local</span>
 <span class="sd">      and global components.</span>
-<span class="sd">      Params: ``tf_type=&#39;linear&#39;, apply_idf=True, idf_type=&#39;smooth&#39;, apply_dl=True, dl_type=&#39;sqrt&#39;``</span>
+<span class="sd">      Params: ``tf_type=&quot;linear&quot;, apply_idf=True, idf_type=&quot;smooth&quot;, apply_dl=True, dl_type=&quot;sqrt&quot;``</span>
 <span class="sd">    - &quot;lucene-style bm25&quot;: Uses a smoothed idf instead of the classic bm25 variant</span>
 <span class="sd">      to prevent weights on terms from going negative.</span>
-<span class="sd">      Params: ``tf_type=&#39;bm25&#39;, apply_idf=True, idf_type=&#39;smooth&#39;, apply_dl=True, dl_type=&#39;linear&#39;``</span>
+<span class="sd">      Params: ``tf_type=&quot;bm25&quot;, apply_idf=True, idf_type=&quot;smooth&quot;, apply_dl=True, dl_type=&quot;linear&quot;``</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        tf_type ({&#39;linear&#39;, &#39;sqrt&#39;, &#39;log&#39;, &#39;binary&#39;}): Type of term frequency (tf)</span>
+<span class="sd">        tf_type ({&quot;linear&quot;, &quot;sqrt&quot;, &quot;log&quot;, &quot;binary&quot;}): Type of term frequency (tf)</span>
 <span class="sd">            to use for weights&#39; local component:</span>
 
-<span class="sd">            - &#39;linear&#39;: tf (tfs are already linear, so left as-is)</span>
-<span class="sd">            - &#39;sqrt&#39;: tf =&gt; sqrt(tf)</span>
-<span class="sd">            - &#39;log&#39;: tf =&gt; log(tf) + 1</span>
-<span class="sd">            - &#39;binary&#39;: tf =&gt; 1</span>
+<span class="sd">            - &quot;linear&quot;: tf (tfs are already linear, so left as-is)</span>
+<span class="sd">            - &quot;sqrt&quot;: tf =&gt; sqrt(tf)</span>
+<span class="sd">            - &quot;log&quot;: tf =&gt; log(tf) + 1</span>
+<span class="sd">            - &quot;binary&quot;: tf =&gt; 1</span>
 
 <span class="sd">        apply_idf (bool): If True, apply global idfs to local term weights, i.e.</span>
 <span class="sd">            divide per-doc term frequencies by the (log of the) total number</span>
 <span class="sd">            of documents in which they appear; otherwise, don&#39;t.</span>
-<span class="sd">        idf_type ({&#39;standard&#39;, &#39;smooth&#39;, &#39;bm25&#39;}): Type of inverse document</span>
+<span class="sd">        idf_type ({&quot;standard&quot;, &quot;smooth&quot;, &quot;bm25&quot;}): Type of inverse document</span>
 <span class="sd">            frequency (idf) to use for weights&#39; global component:</span>
 
-<span class="sd">            - &#39;standard&#39;: idf = log(n_docs / df) + 1.0</span>
-<span class="sd">            - &#39;smooth&#39;: idf = log(n_docs + 1 / df + 1) + 1.0, i.e. 1 is added</span>
+<span class="sd">            - &quot;standard&quot;: idf = log(n_docs / df) + 1.0</span>
+<span class="sd">            - &quot;smooth&quot;: idf = log(n_docs + 1 / df + 1) + 1.0, i.e. 1 is added</span>
 <span class="sd">              to all document frequencies, as if a single document containing</span>
 <span class="sd">              every unique term was added to the corpus. This prevents zero divisions!</span>
-<span class="sd">            - &#39;bm25&#39;: idf = log((n_docs - df + 0.5) / (df + 0.5)), which is</span>
+<span class="sd">            - &quot;bm25&quot;: idf = log((n_docs - df + 0.5) / (df + 0.5)), which is</span>
 <span class="sd">              a form commonly used in information retrieval that allows for</span>
 <span class="sd">              very common terms to receive negative weights.</span>
 
 <span class="sd">        apply_dl (bool): If True, normalize local(+global) weights by doc length,</span>
 <span class="sd">            i.e. divide by the total number of in-vocabulary terms appearing</span>
 <span class="sd">            in a given doc; otherwise, don&#39;t.</span>
-<span class="sd">        dl_type ({&#39;linear&#39;, &#39;sqrt&#39;, &#39;log&#39;}): Type of document-length scaling</span>
+<span class="sd">        dl_type ({&quot;linear&quot;, &quot;sqrt&quot;, &quot;log&quot;}): Type of document-length scaling</span>
 <span class="sd">            to use for weights&#39; normalization component:</span>
 
-<span class="sd">            - &#39;linear&#39;: dl (dls are already linear, so left as-is)</span>
-<span class="sd">            - &#39;sqrt&#39;: dl =&gt; sqrt(dl)</span>
-<span class="sd">            - &#39;log&#39;: dl =&gt; log(dl)</span>
+<span class="sd">            - &quot;linear&quot;: dl (dls are already linear, so left as-is)</span>
+<span class="sd">            - &quot;sqrt&quot;: dl =&gt; sqrt(dl)</span>
+<span class="sd">            - &quot;log&quot;: dl =&gt; log(dl)</span>
 
-<span class="sd">        norm ({&#39;l1&#39;, &#39;l2&#39;} or None): If &#39;l1&#39; or &#39;l2&#39;, normalize weights by the</span>
+<span class="sd">        norm ({&quot;l1&quot;, &quot;l2&quot;} or None): If &quot;l1&quot; or &quot;l2&quot;, normalize weights by the</span>
 <span class="sd">            L1 or L2 norms, respectively, of row-wise vectors; otherwise, don&#39;t.</span>
 <span class="sd">        vocabulary_terms (Dict[str, int] or Iterable[str]): Mapping of unique term</span>
 <span class="sd">            string to unique term id, or an iterable of term strings that gets</span>
@@ -402,7 +416,7 @@
             <span class="p">)</span>
         <span class="p">]</span>
 
-<div class="viewcode-block" id="Vectorizer.fit"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.Vectorizer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
+<div class="viewcode-block" id="Vectorizer.fit"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.Vectorizer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Count terms in ``tokenized_docs`` and, if not already provided, build up</span>
 <span class="sd">        a vocabulary based those terms. Fit and store global weights (IDFs)</span>
@@ -416,7 +430,7 @@
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
 <span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
-<span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
+<span class="sd">                    &gt;&gt;&gt; (doc._.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
 
 <span class="sd">        Returns:</span>
@@ -425,7 +439,7 @@
         <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Vectorizer.fit_transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.Vectorizer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
+<div class="viewcode-block" id="Vectorizer.fit_transform"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.Vectorizer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Count terms in ``tokenized_docs`` and, if not already provided, build up</span>
 <span class="sd">        a vocabulary based those terms. Fit and store global weights (IDFs)</span>
@@ -441,7 +455,7 @@
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
 <span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
-<span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
+<span class="sd">                    &gt;&gt;&gt; (doc._.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
 
 <span class="sd">        Returns:</span>
@@ -454,7 +468,7 @@
         <span class="n">doc_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">doc_term_matrix</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">doc_term_matrix</span></div>
 
-<div class="viewcode-block" id="Vectorizer.transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.Vectorizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
+<div class="viewcode-block" id="Vectorizer.transform"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.Vectorizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform ``tokenized_docs`` into a document-term matrix with values</span>
 <span class="sd">        weighted according to the parameters in :class:`Vectorizer` initialization</span>
@@ -468,7 +482,7 @@
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
 <span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
-<span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
+<span class="sd">                    &gt;&gt;&gt; (doc._.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
 
 <span class="sd">        Returns:</span>
@@ -748,7 +762,7 @@
         <span class="k">return</span> <span class="s2">&quot; * &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">w</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="GroupVectorizer"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer">[docs]</a><span class="k">class</span> <span class="nc">GroupVectorizer</span><span class="p">(</span><span class="n">Vectorizer</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupVectorizer"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.GroupVectorizer">[docs]</a><span class="k">class</span> <span class="nc">GroupVectorizer</span><span class="p">(</span><span class="n">Vectorizer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform one or more tokenized documents into a group-term matrix of</span>
 <span class="sd">    shape (# groups, # unique terms), with tf-, tf-idf, or binary-weighted values.</span>
@@ -761,10 +775,9 @@
 
 <span class="sd">    Stream a corpus with metadata from disk::</span>
 
-<span class="sd">        &gt;&gt;&gt; cw = textacy.datasets.CapitolWords()</span>
-<span class="sd">        &gt;&gt;&gt; text_stream, metadata_stream = textacy.io.split_records(</span>
-<span class="sd">        ...     cw.records(limit=1000), &#39;text&#39;, itemwise=False)</span>
-<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus(&#39;en&#39;, texts=text_stream, metadatas=metadata_stream)</span>
+<span class="sd">        &gt;&gt;&gt; ds = textacy.datasets.CapitolWords()</span>
+<span class="sd">        &gt;&gt;&gt; records = ds.records(limit=1000)</span>
+<span class="sd">        &gt;&gt;&gt; corpus = textacy.Corpus(&quot;en&quot;, data=records)</span>
 <span class="sd">        &gt;&gt;&gt; corpus</span>
 <span class="sd">        Corpus(1000 docs; 538172 tokens)</span>
 
@@ -772,11 +785,11 @@
 <span class="sd">    are grouped not by documents but by a categorical value in the docs&#39; metadata::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs, groups = textacy.io.unzip(</span>
-<span class="sd">        ...     (doc.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
-<span class="sd">        ...      doc.metadata[&#39;speaker_name&#39;])</span>
+<span class="sd">        ...     (doc._.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
+<span class="sd">        ...      doc._.meta[&quot;speaker_name&quot;])</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = GroupVectorizer(</span>
-<span class="sd">        ...     apply_idf=True, idf_type=&#39;smooth&#39;, norm=&#39;l2&#39;,</span>
+<span class="sd">        ...     apply_idf=True, idf_type=&quot;smooth&quot;, norm=&quot;l2&quot;,</span>
 <span class="sd">        ...     min_df=3, max_df=0.95)</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix = vectorizer.fit_transform(tokenized_docs, groups)</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix</span>
@@ -787,8 +800,8 @@
 <span class="sd">    the groups, terms, and weights learned in the previous step::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs, groups = textacy.io.unzip(</span>
-<span class="sd">        ...     (doc.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
-<span class="sd">        ...      doc.metadata[&#39;speaker_name&#39;])</span>
+<span class="sd">        ...     (doc._.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
+<span class="sd">        ...      doc._.meta[&quot;speaker_name&quot;])</span>
 <span class="sd">        ...     for doc in corpus[600:])</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix = vectorizer.transform(tokenized_docs, groups)</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix</span>
@@ -807,14 +820,14 @@
 <span class="sd">    to a particular set of values::</span>
 
 <span class="sd">        &gt;&gt;&gt; tokenized_docs, groups = textacy.io.unzip(</span>
-<span class="sd">        ...     (doc.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
-<span class="sd">        ...      doc.metadata[&#39;speaker_name&#39;])</span>
+<span class="sd">        ...     (doc._.to_terms_list(ngrams=1, entities=True, as_strings=True),</span>
+<span class="sd">        ...      doc._.meta[&quot;speaker_name&quot;])</span>
 <span class="sd">        ...     for doc in corpus[:600])</span>
 <span class="sd">        &gt;&gt;&gt; vectorizer = GroupVectorizer(</span>
-<span class="sd">        ...     apply_idf=True, idf_type=&#39;smooth&#39;, norm=&#39;l2&#39;,</span>
+<span class="sd">        ...     apply_idf=True, idf_type=&quot;smooth&quot;, norm=&quot;l2&quot;,</span>
 <span class="sd">        ...     min_df=3, max_df=0.95,</span>
-<span class="sd">        ...     vocabulary_terms=[&#39;legislation&#39;, &#39;federal government&#39;, &#39;house&#39;, &#39;constitutional&#39;],</span>
-<span class="sd">        ...     vocabulary_grps=[&#39;Bernie Sanders&#39;, &#39;Lindsey Graham&#39;, &#39;Rick Santorum&#39;])</span>
+<span class="sd">        ...     vocabulary_terms=[&quot;legislation&quot;, &quot;federal government&quot;, &quot;house&quot;, &quot;constitutional&quot;],</span>
+<span class="sd">        ...     vocabulary_grps=[&quot;Bernie Sanders&quot;, &quot;Lindsey Graham&quot;, &quot;Rick Santorum&quot;])</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix = vectorizer.fit_transform(tokenized_docs, groups)</span>
 <span class="sd">        &gt;&gt;&gt; grp_term_matrix</span>
 <span class="sd">        &lt;3x4 sparse matrix of type &#39;&lt;class &#39;numpy.float64&#39;&gt;&#39;</span>
@@ -828,39 +841,39 @@
 <span class="sd">    out the :class:`Vectorizer` docstring.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        tf_type ({&#39;linear&#39;, &#39;sqrt&#39;, &#39;log&#39;, &#39;binary&#39;}): Type of term frequency (tf)</span>
+<span class="sd">        tf_type ({&quot;linear&quot;, &quot;sqrt&quot;, &quot;log&quot;, &quot;binary&quot;}): Type of term frequency (tf)</span>
 <span class="sd">            to use for weights&#39; local component:</span>
 
-<span class="sd">            - &#39;linear&#39;: tf (tfs are already linear, so left as-is)</span>
-<span class="sd">            - &#39;sqrt&#39;: tf =&gt; sqrt(tf)</span>
-<span class="sd">            - &#39;log&#39;: tf =&gt; log(tf) + 1</span>
-<span class="sd">            - &#39;binary&#39;: tf =&gt; 1</span>
+<span class="sd">            - &quot;linear&quot;: tf (tfs are already linear, so left as-is)</span>
+<span class="sd">            - &quot;sqrt&quot;: tf =&gt; sqrt(tf)</span>
+<span class="sd">            - &quot;log&quot;: tf =&gt; log(tf) + 1</span>
+<span class="sd">            - &quot;binary&quot;: tf =&gt; 1</span>
 
 <span class="sd">        apply_idf (bool): If True, apply global idfs to local term weights, i.e.</span>
 <span class="sd">            divide per-doc term frequencies by the total number of documents</span>
 <span class="sd">            in which they appear (well, the log of that number); otherwise, don&#39;t.</span>
-<span class="sd">        idf_type ({&#39;standard&#39;, &#39;smooth&#39;, &#39;bm25&#39;}): Type of inverse document</span>
+<span class="sd">        idf_type ({&quot;standard&quot;, &quot;smooth&quot;, &quot;bm25&quot;}): Type of inverse document</span>
 <span class="sd">            frequency (idf) to use for weights&#39; global component:</span>
 
-<span class="sd">            - &#39;standard&#39;: idf = log(n_docs / df) + 1.0</span>
-<span class="sd">            - &#39;smooth&#39;: idf = log(n_docs + 1 / df + 1) + 1.0, i.e. 1 is added</span>
+<span class="sd">            - &quot;standard&quot;: idf = log(n_docs / df) + 1.0</span>
+<span class="sd">            - &quot;smooth&quot;: idf = log(n_docs + 1 / df + 1) + 1.0, i.e. 1 is added</span>
 <span class="sd">              to all document frequencies, as if a single document containing</span>
 <span class="sd">              every unique term was added to the corpus.</span>
-<span class="sd">            - &#39;bm25&#39;: idf = log((n_docs - df + 0.5) / (df + 0.5)), which is</span>
+<span class="sd">            - &quot;bm25&quot;: idf = log((n_docs - df + 0.5) / (df + 0.5)), which is</span>
 <span class="sd">              a form commonly used in information retrieval that allows for</span>
 <span class="sd">              very common terms to receive negative weights.</span>
 
 <span class="sd">        apply_dl (bool): If True, normalize local(+global) weights by doc length,</span>
 <span class="sd">            i.e. divide by the total number of in-vocabulary terms appearing</span>
 <span class="sd">            in a given doc; otherwise, don&#39;t.</span>
-<span class="sd">        dl_type ({&#39;linear&#39;, &#39;sqrt&#39;, &#39;log&#39;}): Type of document-length scaling</span>
+<span class="sd">        dl_type ({&quot;linear&quot;, &quot;sqrt&quot;, &quot;log&quot;}): Type of document-length scaling</span>
 <span class="sd">            to use for weights&#39; normalization component:</span>
 
-<span class="sd">            - &#39;linear&#39;: dl (dls are already linear, so left as-is)</span>
-<span class="sd">            - &#39;sqrt&#39;: dl =&gt; sqrt(dl)</span>
-<span class="sd">            - &#39;log&#39;: dl =&gt; log(dl)</span>
+<span class="sd">            - &quot;linear&quot;: dl (dls are already linear, so left as-is)</span>
+<span class="sd">            - &quot;sqrt&quot;: dl =&gt; sqrt(dl)</span>
+<span class="sd">            - &quot;log&quot;: dl =&gt; log(dl)</span>
 
-<span class="sd">        norm ({&#39;l1&#39;, &#39;l2&#39;} or None): If &#39;l1&#39; or &#39;l2&#39;, normalize weights by the</span>
+<span class="sd">        norm ({&quot;l1&quot;, &quot;l2&quot;} or None): If &quot;l1&quot; or &quot;l2&quot;, normalize weights by the</span>
 <span class="sd">            L1 or L2 norms, respectively, of row-wise vectors; otherwise, don&#39;t.</span>
 <span class="sd">        vocabulary_terms (Dict[str, int] or Iterable[str]): Mapping of unique term</span>
 <span class="sd">            string to unique term id, or an iterable of term strings that gets</span>
@@ -970,7 +983,7 @@
             <span class="p">)</span>
         <span class="p">]</span>
 
-<div class="viewcode-block" id="GroupVectorizer.fit"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupVectorizer.fit"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.GroupVectorizer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Count terms in ``tokenized_docs`` and, if not already provided, build up</span>
 <span class="sd">        a vocabulary based those terms; do the same for the groups in ``grps``.</span>
@@ -985,7 +998,7 @@
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
 <span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
-<span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
+<span class="sd">                    &gt;&gt;&gt; (doc._.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
 
 <span class="sd">            grps (Iterable[str]): Sequence of group names by which the terms in</span>
@@ -998,7 +1011,7 @@
         <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="GroupVectorizer.fit_transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupVectorizer.fit_transform"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.GroupVectorizer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Count terms in ``tokenized_docs`` and, if not already provided, build up</span>
 <span class="sd">        a vocabulary based those terms; do the same for the groups in ``grps``.</span>
@@ -1015,7 +1028,7 @@
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
 <span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
-<span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
+<span class="sd">                    &gt;&gt;&gt; (doc._.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
 
 <span class="sd">            grps (Iterable[str]): Sequence of group names by which the terms in</span>
@@ -1032,7 +1045,7 @@
         <span class="n">grp_term_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reweight_values</span><span class="p">(</span><span class="n">grp_term_matrix</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">grp_term_matrix</span></div>
 
-<div class="viewcode-block" id="GroupVectorizer.transform"><a class="viewcode-back" href="../../../api_reference.html#textacy.vsm.vectorizers.GroupVectorizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupVectorizer.transform"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.vsm.vectorizers.GroupVectorizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenized_docs</span><span class="p">,</span> <span class="n">grps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform ``tokenized_docs`` and ``grps`` into a group-term matrix with</span>
 <span class="sd">        values weighted according to the parameters in :class:`GroupVectorizer`</span>
@@ -1047,7 +1060,7 @@
 <span class="sd">                    ...  for spacy_doc in spacy_docs)</span>
 <span class="sd">                    &gt;&gt;&gt; ((ne.text for ne in extract.entities(doc))</span>
 <span class="sd">                    ...  for doc in corpus)</span>
-<span class="sd">                    &gt;&gt;&gt; (doc.to_terms_list(as_strings=True)</span>
+<span class="sd">                    &gt;&gt;&gt; (doc._.to_terms_list(as_strings=True)</span>
 <span class="sd">                    ...  for doc in docs)</span>
 
 <span class="sd">            grps (Iterable[str]): Sequence of group names by which the terms in</span>
@@ -1238,8 +1251,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -1253,10 +1266,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1270,7 +1283,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

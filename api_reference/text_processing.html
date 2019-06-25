@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Text (Pre-)Processing &#8212; textacy 0.7.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Information Extraction" href="information_extraction.html" />
+    <link rel="prev" title="Datasets" href="datasets.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-textacy.preprocess">
+<span id="text-pre-processing"></span><span id="ref-api-reference-text-processing"></span><h1>Text (Pre-)Processing<a class="headerlink" href="#module-textacy.preprocess" title="Permalink to this headline">¶</a></h1>
+<p>Functions that modify raw text <em>in-place</em>, replacing contractions, URLs, emails,
+phone numbers, and currency symbols with standardized forms. These should be
+applied before processing by spaCy, but be warned: preprocessing may affect
+the interpretation of the text – and spaCy’s processing of it.</p>
+<dl class="function">
+<dt id="textacy.preprocess.fix_bad_unicode">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">fix_bad_unicode</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">normalization='NFC'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#fix_bad_unicode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.fix_bad_unicode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix unicode text that’s “broken” using <code class="docutils literal notranslate"><span class="pre">ftfy</span></code>;
+this includes mojibake, HTML entities and other code cruft,
+and non-standard forms for display purposes.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of v0.7.0, this is no longer implemented within textacy. Instead,
+install and import <code class="docutils literal notranslate"><span class="pre">ftfy</span></code> directly, and call <code class="docutils literal notranslate"><span class="pre">ftfy.fix_text(text)</span></code> ,
+which is more extensive and customizable than textacy’s wrapper of it.
+For details, check out <a class="reference external" href="https://ftfy.readthedocs.io">https://ftfy.readthedocs.io</a>.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.normalize_unicode">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">normalize_unicode</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">form='NFC'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#normalize_unicode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.normalize_unicode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize unicode characters in <code class="docutils literal notranslate"><span class="pre">text</span></code> into canonical forms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Raw text.</p></li>
+<li><p><strong>form</strong> (<em>{&quot;NFC&quot;</em><em>, </em><em>&quot;NFD&quot;</em><em>, </em><em>&quot;NFKC&quot;</em><em>, </em><em>&quot;NFKD&quot;}</em>) – Form of normalization applied to
+unicode characters. For example, an “e” with accute accent “´” can be
+written as “e´” (canonical decomposition, “NFD”) or “é” (canonical
+composition, “NFC”). Unicode can be normalized to NFC form
+without any change in meaning, so it’s usually a safe bet. If “NFKC”,
+additional normalizations are applied that can change characters’ meanings,
+e.g. ellipsis characters are replaced with three periods.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize">https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize</a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.normalize_whitespace">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">normalize_whitespace</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#normalize_whitespace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.normalize_whitespace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given <code class="docutils literal notranslate"><span class="pre">text</span></code>, replace one or more spacings with a single space, and one
+or more linebreaks with a single newline. Also strip leading/trailing whitespace.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.preprocess_text">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">preprocess_text</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">fix_unicode=False</em>, <em class="sig-param">normalize_unicode=False</em>, <em class="sig-param">lowercase=False</em>, <em class="sig-param">no_urls=False</em>, <em class="sig-param">no_emails=False</em>, <em class="sig-param">no_phone_numbers=False</em>, <em class="sig-param">no_numbers=False</em>, <em class="sig-param">no_currency_symbols=False</em>, <em class="sig-param">no_punct=False</em>, <em class="sig-param">no_contractions=False</em>, <em class="sig-param">no_accents=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#preprocess_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.preprocess_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize various aspects of raw text before parsing it with spaCy.
+A convenience function for applying all other preprocessing functions in one go.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Raw text to preprocess.</p></li>
+<li><p><strong>fix_unicode</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, fix “broken” unicode such as
+mojibake and garbled HTML entities.</p></li>
+<li><p><strong>normalize_unicode</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, normalize unicode characters in text
+into canonical form.</p></li>
+<li><p><strong>lowercase</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, all text is lower-cased</p></li>
+<li><p><strong>no_urls</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace all URL strings with “<em>URL</em>”</p></li>
+<li><p><strong>no_emails</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace all email strings with “<em>EMAIL</em>”</p></li>
+<li><p><strong>no_phone_numbers</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace all phone number strings
+with “<em>PHONE</em>”</p></li>
+<li><p><strong>no_numbers</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace all number-like strings
+with “<em>NUMBER</em>”</p></li>
+<li><p><strong>no_currency_symbols</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace all currency symbols
+with their standard 3-letter abbreviations</p></li>
+<li><p><strong>no_punct</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, remove all punctuation (replace with
+empty string)</p></li>
+<li><p><strong>no_contractions</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace <em>English</em> contractions
+with their unshortened forms</p></li>
+<li><p><strong>no_accents</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, replace all accented characters
+with unaccented versions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>input <code class="docutils literal notranslate"><span class="pre">text</span></code> processed according to function args</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)">str</a></p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>These changes may negatively affect subsequent NLP analysis performed
+on the text, so choose carefully, and preprocess at your own risk!</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.remove_accents">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">remove_accents</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">method='unicode'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#remove_accents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.remove_accents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove accents from any accented unicode characters in <code class="docutils literal notranslate"><span class="pre">text</span></code>, either by
+transforming them into ascii equivalents or removing them entirely.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Raw text.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;unicode&quot;</em><em>, </em><em>&quot;ascii&quot;}</em>) – <p>If “unicode”, remove accented char
+for any unicode symbol with a direct ASCII equivalent; if “ascii”,
+remove accented char for any unicode symbol.</p>
+<p>Note: The “ascii” method is notably faster than “unicode”, but less good.</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">method</span></code> is not in {“unicode”, “ascii”}.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.remove_punct">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">remove_punct</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">marks=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#remove_punct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.remove_punct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove punctuation from <code class="docutils literal notranslate"><span class="pre">text</span></code> by replacing all instances of <code class="docutils literal notranslate"><span class="pre">marks</span></code>
+with whitespace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Raw text.</p></li>
+<li><p><strong>marks</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – If specified, remove only the characters in this string,
+e.g. <code class="docutils literal notranslate"><span class="pre">marks=&quot;,;:&quot;</span></code> removes commas, semi-colons, and colons.
+Otherwise, all punctuation marks are removed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">marks=None</span></code>, Python’s built-in <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str.translate" title="(in Python v3.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.translate()</span></code></a> is
+used to remove punctuation; otherwise, a regular expression is used
+instead. The former’s performance is about 5-10x faster.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.replace_currency_symbols">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">replace_currency_symbols</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">replace_with=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#replace_currency_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.replace_currency_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all currency symbols in <code class="docutils literal notranslate"><span class="pre">text</span></code> with string specified by <code class="docutils literal notranslate"><span class="pre">replace_with</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Raw text.</p></li>
+<li><p><strong>replace_with</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – If None (default), replace symbols with
+their standard 3-letter abbreviations (e.g. “$” with “USD”, “£” with “GBP”);
+otherwise, pass in a string with which to replace all symbols
+(e.g. “<em>CURRENCY</em>”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.replace_emails">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">replace_emails</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">replace_with='*EMAIL*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#replace_emails"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.replace_emails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all emails in <code class="docutils literal notranslate"><span class="pre">text</span></code> with <code class="docutils literal notranslate"><span class="pre">replace_with</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.replace_numbers">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">replace_numbers</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">replace_with='*NUMBER*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#replace_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.replace_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all numbers in <code class="docutils literal notranslate"><span class="pre">text</span></code> with <code class="docutils literal notranslate"><span class="pre">replace_with</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.replace_phone_numbers">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">replace_phone_numbers</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">replace_with='*PHONE*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#replace_phone_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.replace_phone_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all phone numbers in <code class="docutils literal notranslate"><span class="pre">text</span></code> with <code class="docutils literal notranslate"><span class="pre">replace_with</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.replace_urls">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">replace_urls</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">replace_with='*URL*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#replace_urls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.replace_urls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all URLs in <code class="docutils literal notranslate"><span class="pre">text</span></code> with <code class="docutils literal notranslate"><span class="pre">replace_with</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.preprocess.unpack_contractions">
+<code class="sig-prename descclassname">textacy.preprocess.</code><code class="sig-name descname">unpack_contractions</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/preprocess.html#unpack_contractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.preprocess.unpack_contractions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace <em>English</em> contractions in <code class="docutils literal notranslate"><span class="pre">text</span></code> with their unshortened forms.
+N.B. The “‘d” and “‘s” forms are ambiguous (had/would, is/has/possessive),
+so are left as-is.</p>
+</dd></dl>
+
+<span class="target" id="module-textacy.text_utils"></span><div class="section" id="text-utils">
+<h2>Text Utils<a class="headerlink" href="#text-utils" title="Permalink to this headline">¶</a></h2>
+<p>Set of small utility functions that take text strings as input.</p>
+<dl class="function">
+<dt id="textacy.text_utils.KWIC">
+<code class="sig-prename descclassname">textacy.text_utils.</code><code class="sig-name descname">KWIC</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">keyword</em>, <em class="sig-param">ignore_case=True</em>, <em class="sig-param">window_width=50</em>, <em class="sig-param">print_only=True</em><span class="sig-paren">)</span><a class="headerlink" href="#textacy.text_utils.KWIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias of <a class="reference internal" href="#textacy.text_utils.keyword_in_context" title="textacy.text_utils.keyword_in_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">keyword_in_context</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.text_utils.clean_terms">
+<code class="sig-prename descclassname">textacy.text_utils.</code><code class="sig-name descname">clean_terms</code><span class="sig-paren">(</span><em class="sig-param">terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/text_utils.html#clean_terms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.text_utils.clean_terms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up a sequence of single- or multi-word strings: strip leading/trailing
+junk chars, handle dangling parens and odd hyphenation, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>terms</strong> (<em>Iterable</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – sequence of terms such as “presidency”, “epic failure”,
+or “George W. Bush” that may be _unclean_ for whatever reason</p>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><p><em>str</em> – next term in <cite>terms</cite> but with the cruft cleaned up, excluding terms
+that were _entirely_ cruft</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Terms with (intentionally) unusual punctuation may get “cleaned”
+into a form that changes or obscures the original meaning of the term.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.text_utils.is_acronym">
+<code class="sig-prename descclassname">textacy.text_utils.</code><code class="sig-name descname">is_acronym</code><span class="sig-paren">(</span><em class="sig-param">token</em>, <em class="sig-param">exclude=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/text_utils.html#is_acronym"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.text_utils.is_acronym" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass single token as a string, return True/False if is/is not valid acronym.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Single word to check for acronym-ness</p></li>
+<li><p><strong>exclude</strong> (<em>Set</em><em>[</em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>]</em>) – If technically valid but not actually good acronyms
+are known in advance, pass them in as a set of strings; matching
+tokens will return False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textacy.text_utils.keyword_in_context">
+<code class="sig-prename descclassname">textacy.text_utils.</code><code class="sig-name descname">keyword_in_context</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">keyword</em>, <em class="sig-param">ignore_case=True</em>, <em class="sig-param">window_width=50</em>, <em class="sig-param">print_only=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/textacy/text_utils.html#keyword_in_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#textacy.text_utils.keyword_in_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for <code class="docutils literal notranslate"><span class="pre">keyword</span></code> in <code class="docutils literal notranslate"><span class="pre">text</span></code> via regular expression, return or print strings
+spanning <code class="docutils literal notranslate"><span class="pre">window_width</span></code> characters before and after each occurrence of keyword.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Text in which to search for <code class="docutils literal notranslate"><span class="pre">keyword</span></code>.</p></li>
+<li><p><strong>keyword</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Technically, any valid regular expression string should work,
+but usually this is a single word or short phrase: “spam”, “spam and eggs”;
+to account for variations, use regex: “[Ss]pam (and|&amp;) [Ee]ggs?”</p>
+<p>Note: If keyword contains special characters, be sure to escape them!</p>
+</p></li>
+<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, ignore letter case in <code class="docutils literal notranslate"><span class="pre">keyword</span></code> matching.</p></li>
+<li><p><strong>window_width</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of characters on either side of <code class="docutils literal notranslate"><span class="pre">keyword</span></code>
+to include as “context”.</p></li>
+<li><p><strong>print_only</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – If True, print out all results with nice formatting;
+if False, return all (pre, kw, post) matches as generator of raw strings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>generator(Tuple[str, str, str]), or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="datasets.html" title="Previous document">Datasets</a>
+        </li>
+        <li>
+          <a href="information_extraction.html" title="Next document">Information Extraction</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">textacy</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=chartbeat-labs&repo=textacy&type=watch&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="root.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="doc_and_corpus.html">Doc and Corpus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spacier.html">spaCy extensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Text (Pre-)Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="information_extraction.html">Information Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vsm_and_tm.html">Vectorization &amp; Topic Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html">IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="viz.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc.html">Miscellany</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="root.html">API Reference</a><ul>
+      <li>Previous: <a href="datasets.html" title="previous chapter">Datasets</a></li>
+      <li>Next: <a href="information_extraction.html" title="next chapter">Information Extraction</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019 Chartbeat, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api_reference/text_processing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

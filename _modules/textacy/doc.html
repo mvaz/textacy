@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.doc &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.doc &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -45,7 +45,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
 
 
-<div class="viewcode-block" id="make_spacy_doc"><a class="viewcode-back" href="../../api_reference.html#textacy.doc.make_spacy_doc">[docs]</a><span class="k">def</span> <span class="nf">make_spacy_doc</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">lang_utils</span><span class="o">.</span><span class="n">detect_lang</span><span class="p">):</span>
+<div class="viewcode-block" id="make_spacy_doc"><a class="viewcode-back" href="../../api_reference/doc_and_corpus.html#textacy.doc.make_spacy_doc">[docs]</a><span class="k">def</span> <span class="nf">make_spacy_doc</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lang</span><span class="o">=</span><span class="n">lang_utils</span><span class="o">.</span><span class="n">identify_lang</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make a :class:`spacy.tokens.Doc` from valid inputs, and automatically</span>
 <span class="sd">    load/validate :class:`spacy.language.Language` pipelines to process ``data``.</span>
@@ -78,7 +78,7 @@
 <span class="sd">        &gt;&gt;&gt; make_spacy_doc(text, lang=&quot;en&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; make_spacy_doc(text, lang=&quot;en_core_web_sm&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; make_spacy_doc(text, lang=textacy.load_spacy_lang(&quot;en&quot;))</span>
-<span class="sd">        &gt;&gt;&gt; make_spacy_doc(text, lang=textacy.lang_utils.detect_lang)</span>
+<span class="sd">        &gt;&gt;&gt; make_spacy_doc(text, lang=textacy.lang_utils.identify_lang)</span>
 
 <span class="sd">    Ensure that an already-processed ``Doc`` is compatible with ``lang``:</span>
 
@@ -237,8 +237,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -252,10 +252,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -269,7 +269,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

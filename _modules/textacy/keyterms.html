@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.keyterms &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.keyterms &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -33,6 +33,9 @@
   <h1>Source code for textacy.keyterms</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Key Terms</span>
+<span class="sd">---------</span>
+
 <span class="sd">Functions for unsupervised automatic key term extraction, both specific algorithms</span>
 <span class="sd">(SGRank, TextRank, SingleRank) and a generalization of semantic network-based methods.</span>
 <span class="sd">Also includes a function to aggregate common key term variants of the same idea.</span>
@@ -59,7 +62,7 @@
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="sgrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.sgrank">[docs]</a><span class="k">def</span> <span class="nf">sgrank</span><span class="p">(</span>
+<div class="viewcode-block" id="sgrank"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.sgrank">[docs]</a><span class="k">def</span> <span class="nf">sgrank</span><span class="p">(</span>
     <span class="n">doc</span><span class="p">,</span>
     <span class="n">ngrams</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span>
@@ -73,11 +76,10 @@
 <span class="sd">    Args:</span>
 <span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
 <span class="sd">        ngrams (int or Set[int]): n of which n-grams to include; ``(1, 2, 3, 4, 5, 6)``</span>
-<span class="sd">                (default) includes all ngrams from 1 to 6; `2`</span>
-<span class="sd">                if only bigrams are wanted</span>
-<span class="sd">        normalize (str or callable): If &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">            (default) includes all ngrams from 1 to 6; `2` if only bigrams are wanted</span>
+<span class="sd">        normalize (str or callable): If &quot;lemma&quot;, lemmatize terms; if &quot;lower&quot;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
-<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Span`` and return a str,</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``Span`` and return a str,</span>
 <span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        window_width (int): Width of sliding window in which term</span>
 <span class="sd">            co-occurrences are determined to occur. Note: Larger values may</span>
@@ -92,12 +94,12 @@
 <span class="sd">            Results are typically better with idf information.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List[Tuple[str, float]]: sorted list of top ``n_keyterms`` key terms and</span>
+<span class="sd">        List[Tuple[str, float]]: Sorted list of top ``n_keyterms`` key terms and</span>
 <span class="sd">        their corresponding SGRank scores</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: If ``n_keyterms`` is a float but not in (0.0, 1.0] or</span>
-<span class="sd">            ``window_width`` &lt; 2.</span>
+<span class="sd">        ValueError: if ``n_keyterms`` is a float but not in (0.0, 1.0] or</span>
+<span class="sd">            ``window_width`` &lt; 2</span>
 
 <span class="sd">    References:</span>
 <span class="sd">        .. [SGRank] Danesh, Sumner, and Martin. &quot;SGRank: Combining Statistical and</span>
@@ -238,23 +240,24 @@
     <span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="textrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.textrank">[docs]</a><span class="k">def</span> <span class="nf">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="textrank"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.textrank">[docs]</a><span class="k">def</span> <span class="nf">textrank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convenience function for calling :func:`key_terms_from_semantic_network &lt;textacy.keyterms.key_terms_from_semantic_network&gt;`</span>
+<span class="sd">    Convenience function for calling :func:`key_terms_from_semantic_network()`</span>
 <span class="sd">    with the parameter values used in the [TextRank]_ algorithm.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
-<span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">        normalize (str or callable): If &quot;lemma&quot;, lemmatize terms; if &quot;lower&quot;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
-<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``Token`` and return a str,</span>
 <span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
 <span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
 <span class="sd">            representing the fraction of top-ranked terms to return as keyterms</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        See :func:`key_terms_from_semantic_network`.</span>
+<span class="sd">        List[Tuple[str, float]]: Sorted list of top ``n_keyterms`` key terms and</span>
+<span class="sd">        their corresponding TextRank ranking scores.</span>
 
 <span class="sd">    References:</span>
 <span class="sd">        .. [TextRank] Mihalcea, R., &amp; Tarau, P. (2004, July). TextRank: Bringing</span>
@@ -271,23 +274,24 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="singlerank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.singlerank">[docs]</a><span class="k">def</span> <span class="nf">singlerank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="singlerank"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.singlerank">[docs]</a><span class="k">def</span> <span class="nf">singlerank</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">n_keyterms</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convenience function for calling :func:`key_terms_from_semantic_network &lt;textacy.keyterms.key_terms_from_semantic_network&gt;`</span>
+<span class="sd">    Convenience function for calling :func:`key_terms_from_semantic_network()`</span>
 <span class="sd">    with the parameter values used in the [SingleRank]_ algorithm.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
-<span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">        normalize (str or callable): If &quot;lemma&quot;, lemmatize terms; if &quot;lower&quot;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
-<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``Token`` and return a str,</span>
 <span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
 <span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
 <span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
 <span class="sd">            representing the fraction of top-ranked terms to return as keyterms</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        see :func:`key_terms_from_semantic_network`.</span>
+<span class="sd">        List[Tuple[str, float]]: Sorted list of top ``n_keyterms`` key terms and</span>
+<span class="sd">        their corresponding SingleRank ranking scores.</span>
 
 <span class="sd">    References:</span>
 <span class="sd">        .. [SingleRank] Hasan, K. S., &amp; Ng, V. (2010, August). Conundrums in unsupervised</span>
@@ -306,7 +310,7 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="key_terms_from_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.key_terms_from_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">key_terms_from_semantic_network</span><span class="p">(</span>
+<div class="viewcode-block" id="key_terms_from_semantic_network"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.key_terms_from_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">key_terms_from_semantic_network</span><span class="p">(</span>
     <span class="n">doc</span><span class="p">,</span>
     <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span>
     <span class="n">window_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -322,32 +326,32 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc (:class:`spacy.tokens.Doc`)</span>
-<span class="sd">        normalize (str or callable): if &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
+<span class="sd">        normalize (str or callable): If &quot;lemma&quot;, lemmatize terms; if &quot;lower&quot;,</span>
 <span class="sd">            lowercase terms; if None, use the form of terms as they appeared in</span>
-<span class="sd">            ``doc``; if a callable, must accept a ``spacy.Token`` and return a str,</span>
+<span class="sd">            ``doc``; if a callable, must accept a ``Token`` and return a str,</span>
 <span class="sd">            e.g. :func:`textacy.spacier.utils.get_normalized_text()`</span>
-<span class="sd">        window_width (int): width of sliding window in which term</span>
+<span class="sd">        window_width (int): Width of sliding window in which term</span>
 <span class="sd">            co-occurrences are said to occur</span>
-<span class="sd">        edge_weighting (&#39;binary&#39;, &#39;cooc_freq&#39;}): method used to</span>
-<span class="sd">            determine weights of edges between nodes in the semantic network;</span>
-<span class="sd">            if &#39;binary&#39;, edge weight is set to 1 for any two terms co-occurring</span>
-<span class="sd">            within `window_width` terms; if &#39;cooc_freq&#39;, edge weight is set to</span>
+<span class="sd">        edge_weighting (&quot;binary&quot;, &quot;cooc_freq&quot;}): Method used to determine</span>
+<span class="sd">            weights of edges between nodes in the semantic network;</span>
+<span class="sd">            if &quot;binary&quot;, edge weight is set to 1 for any two terms co-occurring</span>
+<span class="sd">            within ``window_width`` terms; if &quot;cooc_freq&quot;, edge weight is set to</span>
 <span class="sd">            the number of times that any two terms co-occur</span>
-<span class="sd">        ranking_algo ({&#39;pagerank&#39;, &#39;divrank&#39;, &#39;bestcoverage&#39;}):</span>
-<span class="sd">            algorithm with which to rank nodes in the semantic network;</span>
-<span class="sd">            `pagerank` is the canonical (and default) algorithm, but it prioritizes</span>
+<span class="sd">        ranking_algo ({&quot;pagerank&quot;, &quot;divrank&quot;, &quot;bestcoverage&quot;}):</span>
+<span class="sd">            Algorithm with which to rank nodes in the semantic network;</span>
+<span class="sd">            &quot;pagerank&quot; is the canonical (and default) algorithm, but it prioritizes</span>
 <span class="sd">            node centrality at the expense of node diversity; the other two</span>
 <span class="sd">            attempt to balance centrality with diversity</span>
-<span class="sd">        join_key_words (bool): if True, join consecutive key words</span>
+<span class="sd">        join_key_words (bool): If True, join consecutive key words</span>
 <span class="sd">            together into longer key terms, taking the sum of the constituent words&#39;</span>
 <span class="sd">            scores as the joined key term&#39;s combined score</span>
-<span class="sd">        n_keyterms (int or float): if int, number of top-ranked terms</span>
+<span class="sd">        n_keyterms (int or float): If int, number of top-ranked terms</span>
 <span class="sd">            to return as keyterms; if float, must be in the open interval (0, 1),</span>
 <span class="sd">            is converted to an integer by ``round(len(doc) * n_keyterms)``</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List[Tuple[str, float]]: sorted list of top ``n_keyterms`` key terms and</span>
-<span class="sd">        their corresponding ranking scores</span>
+<span class="sd">        List[Tuple[str, float]]: Sorted list of top ``n_keyterms`` key terms and</span>
+<span class="sd">        their corresponding ranking scores.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``n_keyterms`` is a float but not in (0.0, 1.0]</span>
@@ -446,30 +450,29 @@
     <span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="most_discriminating_terms"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.most_discriminating_terms">[docs]</a><span class="k">def</span> <span class="nf">most_discriminating_terms</span><span class="p">(</span>
+<div class="viewcode-block" id="most_discriminating_terms"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.most_discriminating_terms">[docs]</a><span class="k">def</span> <span class="nf">most_discriminating_terms</span><span class="p">(</span>
     <span class="n">terms_lists</span><span class="p">,</span> <span class="n">bool_array_grp1</span><span class="p">,</span> <span class="n">max_n_terms</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">top_n_terms</span><span class="o">=</span><span class="mi">25</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a collection of documents assigned to 1 of 2 exclusive groups, get the</span>
-<span class="sd">    `top_n_terms` most discriminating terms for group1-and-not-group2 and</span>
+<span class="sd">    ``top_n_terms`` most discriminating terms for group1-and-not-group2 and</span>
 <span class="sd">    group2-and-not-group1.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        terms_lists (Iterable[Iterable[str]]): a sequence of documents, each as a</span>
+<span class="sd">        terms_lists (Iterable[Iterable[str]]): Sequence of documents, each as a</span>
 <span class="sd">            sequence of (str) terms; used as input to :func:`doc_term_matrix()`</span>
-<span class="sd">        bool_array_grp1 (Iterable[bool]): an ordered sequence of True/False values,</span>
+<span class="sd">        bool_array_grp1 (Iterable[bool]): Ordered sequence of True/False values,</span>
 <span class="sd">            where True corresponds to documents falling into &quot;group 1&quot; and False</span>
-<span class="sd">            corresponds to those in &quot;group 2&quot;</span>
-<span class="sd">        max_n_terms (int): only consider terms whose document frequency is within</span>
-<span class="sd">            the top `max_n_terms` out of all distinct terms; must be &gt; 0</span>
-<span class="sd">        top_n_terms (int or float): if int (must be &gt; 0), the total number of most</span>
+<span class="sd">            corresponds to those in &quot;group 2&quot;.</span>
+<span class="sd">        max_n_terms (int): Only consider terms whose document frequency is within</span>
+<span class="sd">            the top ``max_n_terms`` out of all distinct terms; must be &gt; 0.</span>
+<span class="sd">        top_n_terms (int or float): If int (must be &gt; 0), the total number of most</span>
 <span class="sd">            discriminating terms to return for each group; if float (must be in</span>
-<span class="sd">            the interval (0, 1)), the fraction of `max_n_terms` to return for each group</span>
+<span class="sd">            the interval (0, 1)), the fraction of ``max_n_terms`` to return for each group.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List[str]: top `top_n_terms` most discriminating terms for grp1-not-grp2</span>
-
-<span class="sd">        List[str]: top `top_n_terms` most discriminating terms for grp2-not-grp1</span>
+<span class="sd">        List[str]: Top ``top_n_terms`` most discriminating terms for grp1-not-grp2</span>
+<span class="sd">        List[str]: Top ``top_n_terms`` most discriminating terms for grp2-not-grp1</span>
 
 <span class="sd">    References:</span>
 <span class="sd">        King, Gary, Patrick Lam, and Margaret Roberts. &quot;Computer-Assisted Keyword</span>
@@ -623,7 +626,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">top_grp1_terms</span><span class="p">,</span> <span class="n">top_grp2_terms</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="aggregate_term_variants"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.aggregate_term_variants">[docs]</a><span class="k">def</span> <span class="nf">aggregate_term_variants</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fuzzy_dedupe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="aggregate_term_variants"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.aggregate_term_variants">[docs]</a><span class="k">def</span> <span class="nf">aggregate_term_variants</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">acro_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fuzzy_dedupe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Take a set of unique terms and aggregate terms that are symbolic, lexical,</span>
 <span class="sd">    and ordering variants of each other, as well as acronyms and fuzzy string matches.</span>
@@ -733,13 +736,13 @@
     <span class="k">return</span> <span class="n">agg_terms</span></div>
 
 
-<div class="viewcode-block" id="rank_nodes_by_bestcoverage"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.rank_nodes_by_bestcoverage">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_bestcoverage</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<div class="viewcode-block" id="rank_nodes_by_bestcoverage"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.rank_nodes_by_bestcoverage">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_bestcoverage</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rank nodes in a network using the [BestCoverage]_ algorithm that attempts to</span>
 <span class="sd">    balance between node centrality and diversity.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        graph (:class:`networkx.Graph &lt;networkx.Graph&gt;`)</span>
+<span class="sd">        graph (:class:`networkx.Graph`)</span>
 <span class="sd">        k (int): number of results to return for top-k search</span>
 <span class="sd">        c (int): *l* parameter for *l*-step expansion; best if 1 or 2</span>
 <span class="sd">        alpha (float): float in [0.0, 1.0] specifying how much of</span>
@@ -748,7 +751,7 @@
 <span class="sd">            more emphasis on diversity</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: top ``k`` nodes as ranked by bestcoverage algorithm; keys as node</span>
+<span class="sd">        dict: Top ``k`` nodes as ranked by bestcoverage algorithm; keys as node</span>
 <span class="sd">        identifiers, values as corresponding ranking scores</span>
 
 <span class="sd">    References:</span>
@@ -847,14 +850,14 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="rank_nodes_by_divrank"><a class="viewcode-back" href="../../api_reference.html#textacy.keyterms.rank_nodes_by_divrank">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_divrank</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<div class="viewcode-block" id="rank_nodes_by_divrank"><a class="viewcode-back" href="../../api_reference/information_extraction.html#textacy.keyterms.rank_nodes_by_divrank">[docs]</a><span class="k">def</span> <span class="nf">rank_nodes_by_divrank</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rank nodes in a network using the [DivRank]_ algorithm that attempts to</span>
 <span class="sd">    balance between node centrality and diversity.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        graph (:class:`networkx.Graph &lt;networkx.Graph&gt;`):</span>
-<span class="sd">        r (:class:`numpy.array`,): the &quot;personalization vector&quot;;</span>
+<span class="sd">        graph (:class:`networkx.Graph`):</span>
+<span class="sd">        r (:class:`numpy.ndarray`): the &quot;personalization vector&quot;;</span>
 <span class="sd">            by default, ``r = ones(1, n)/n``</span>
 <span class="sd">        lambda_ (float): must be in [0.0, 1.0]</span>
 <span class="sd">        alpha (float): controls the strength of self-links;</span>
@@ -961,8 +964,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -976,10 +979,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -993,7 +996,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

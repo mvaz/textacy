@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.network &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.network &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -56,7 +56,7 @@
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="terms_to_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.network.terms_to_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">terms_to_semantic_network</span><span class="p">(</span>
+<div class="viewcode-block" id="terms_to_semantic_network"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.network.terms_to_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">terms_to_semantic_network</span><span class="p">(</span>
     <span class="n">terms</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">window_width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s2">&quot;cooc_freq&quot;</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -66,8 +66,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        terms (List[str] or List[:class:`spacy.tokens.Token`])</span>
-<span class="sd">        normalize (str or Callable): If &#39;lemma&#39;, lemmatize terms; if &#39;lower&#39;,</span>
-<span class="sd">            lowercase terms; if false-y, use the form of terms as they appear</span>
+<span class="sd">        normalize (str or Callable): If &quot;lemma&quot;, lemmatize terms; if &quot;lower&quot;,</span>
+<span class="sd">            lowercase terms; if falsy, use the form of terms as they appear</span>
 <span class="sd">            in ``terms``; if a callable, must accept a ``Token`` and return</span>
 <span class="sd">            a str, e.g. :func:`textacy.spacier.utils.get_normalized_text()`.</span>
 
@@ -83,15 +83,15 @@
 <span class="sd">            if &#39;binary&#39;, all such edges have weight = 1.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ``networkx.Graph``: Nodes in this network correspond to individual terms;</span>
+<span class="sd">        :class:`networkx.Graph`: Nodes in this network correspond to individual terms;</span>
 <span class="sd">        those that co-occur are connected by edges with weights determined</span>
 <span class="sd">        by ``edge_weighting``.</span>
 
-<span class="sd">    Notes:</span>
+<span class="sd">    Note:</span>
 <span class="sd">        - Be sure to filter out stopwords, punctuation, certain parts of speech, etc.</span>
 <span class="sd">          from the terms list before passing it to this function</span>
 <span class="sd">        - Multi-word terms, such as named entities and compound nouns, must be merged</span>
-<span class="sd">          into single strings or spacy.Tokens beforehand</span>
+<span class="sd">          into single strings or ``Token`` s beforehand</span>
 <span class="sd">        - If terms are already strings, be sure to have normalized them so that</span>
 <span class="sd">          like terms are counted together; for example, by applying</span>
 <span class="sd">          :func:`textacy.spacier.utils.get_normalized_text()`</span>
@@ -166,7 +166,7 @@
     <span class="k">return</span> <span class="n">graph</span></div>
 
 
-<div class="viewcode-block" id="sents_to_semantic_network"><a class="viewcode-back" href="../../api_reference.html#textacy.network.sents_to_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">sents_to_semantic_network</span><span class="p">(</span><span class="n">sents</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="sents_to_semantic_network"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.network.sents_to_semantic_network">[docs]</a><span class="k">def</span> <span class="nf">sents_to_semantic_network</span><span class="p">(</span><span class="n">sents</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;lemma&quot;</span><span class="p">,</span> <span class="n">edge_weighting</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a list of sentences into a semantic network, where each sentence is</span>
 <span class="sd">    represented by a node with edges linking it to other sentences weighted by</span>
@@ -189,11 +189,11 @@
 <span class="sd">            all words in a given sentence pair.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ``networkx.Graph``: Nodes are the integer indexes of the sentences</span>
+<span class="sd">        :class:`networkx.Graph`: Nodes are the integer indexes of the sentences</span>
 <span class="sd">        in ``sents``, *not* the actual text of the sentences! Edges connect</span>
 <span class="sd">        every node, with weights determined by ``edge_weighting``.</span>
 
-<span class="sd">    Notes:</span>
+<span class="sd">    Note:</span>
 <span class="sd">        - If passing sentences as strings, be sure to filter out stopwords, punctuation,</span>
 <span class="sd">          certain parts of speech, etc. beforehand</span>
 <span class="sd">        - Consider normalizing the strings so that like terms are counted together</span>
@@ -305,8 +305,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -320,10 +320,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -337,7 +337,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

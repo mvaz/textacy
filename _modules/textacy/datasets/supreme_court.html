@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.datasets.supreme_court &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.datasets.supreme_court &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -106,7 +106,7 @@
 <span class="n">DOWNLOAD_ROOT</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/bdewilde/textacy-data/releases/download/&quot;</span>
 
 
-<div class="viewcode-block" id="SupremeCourt"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.supreme_court.SupremeCourt">[docs]</a><span class="k">class</span> <span class="nc">SupremeCourt</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="SupremeCourt"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.supreme_court.SupremeCourt">[docs]</a><span class="k">class</span> <span class="nc">SupremeCourt</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stream a collection of U.S. Supreme Court decisions from a compressed json file on disk,</span>
 <span class="sd">    either as texts or text + metadata pairs.</span>
@@ -141,7 +141,7 @@
 <span class="sd">        &gt;&gt;&gt; for text in sc.texts(min_len=250000):</span>
 <span class="sd">        ...     print(len(text))</span>
 
-<span class="sd">    Stream decisions into a :class:`textacy.Corpus`::</span>
+<span class="sd">    Stream decisions into a :class:`textacy.Corpus &lt;textacy.corpus.Corpus&gt;`::</span>
 
 <span class="sd">        &gt;&gt;&gt; textacy.Corpus(&quot;en&quot;, data=sc.records(limit=25))</span>
 <span class="sd">        Corpus(25 docs; 136696 tokens)</span>
@@ -598,7 +598,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="SupremeCourt.download"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.supreme_court.SupremeCourt.download">[docs]</a>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="SupremeCourt.download"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.supreme_court.SupremeCourt.download">[docs]</a>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Download the data as a Python version-specific compressed json file and</span>
 <span class="sd">        save it to disk under the ``data_dir`` directory.</span>
@@ -679,7 +679,7 @@
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">record</span>
 
-<div class="viewcode-block" id="SupremeCourt.texts"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.supreme_court.SupremeCourt.texts">[docs]</a>    <span class="k">def</span> <span class="nf">texts</span><span class="p">(</span>
+<div class="viewcode-block" id="SupremeCourt.texts"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.supreme_court.SupremeCourt.texts">[docs]</a>    <span class="k">def</span> <span class="nf">texts</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">opinion_author</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">decision_direction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -723,7 +723,7 @@
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filtered_iter</span><span class="p">(</span><span class="n">filters</span><span class="p">),</span> <span class="n">limit</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="SupremeCourt.records"><a class="viewcode-back" href="../../../api_reference.html#textacy.datasets.supreme_court.SupremeCourt.records">[docs]</a>    <span class="k">def</span> <span class="nf">records</span><span class="p">(</span>
+<div class="viewcode-block" id="SupremeCourt.records"><a class="viewcode-back" href="../../../api_reference/datasets.html#textacy.datasets.supreme_court.SupremeCourt.records">[docs]</a>    <span class="k">def</span> <span class="nf">records</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">opinion_author</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">decision_direction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -802,8 +802,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -817,10 +817,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -834,7 +834,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

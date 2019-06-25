@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.tm.topic_model &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.tm.topic_model &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -51,7 +51,7 @@
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TopicModel"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel">[docs]</a><span class="k">class</span> <span class="nc">TopicModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="TopicModel"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel">[docs]</a><span class="k">class</span> <span class="nc">TopicModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Train and apply a topic model to vectorized texts using scikit-learn&#39;s</span>
 <span class="sd">    implementations of LSA, LDA, and NMF models. Inspect and visualize results.</span>
@@ -59,31 +59,37 @@
 
 <span class="sd">    Prepare a vectorized corpus (i.e. document-term matrix) and corresponding</span>
 <span class="sd">    vocabulary (i.e. mapping of term strings to column indices in the matrix).</span>
-<span class="sd">    See :class:`textacy.vsm.Vectorizer` for details. In short::</span>
+<span class="sd">    See :class:`textacy.vsm.Vectorizer` for details. In short:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; vectorizer = Vectorizer(</span>
-<span class="sd">        ...     tf_type=&#39;linear&#39;, apply_idf=True, idf_type=&#39;smooth&#39;, norm=&#39;l2&#39;,</span>
+<span class="sd">        ...     tf_type=&quot;linear&quot;, apply_idf=True, idf_type=&quot;smooth&quot;, norm=&quot;l2&quot;,</span>
 <span class="sd">        ...     min_df=3, max_df=0.95, max_n_terms=100000)</span>
 <span class="sd">        &gt;&gt;&gt; doc_term_matrix = vectorizer.fit_transform(terms_list)</span>
 
-<span class="sd">    Initialize and train a topic model::</span>
+<span class="sd">    Initialize and train a topic model:</span>
 
-<span class="sd">        &gt;&gt;&gt; model = textacy.tm.TopicModel(&#39;nmf&#39;, n_topics=20)</span>
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; model = textacy.tm.TopicModel(&quot;nmf&quot;, n_topics=20)</span>
 <span class="sd">        &gt;&gt;&gt; model.fit(doc_term_matrix)</span>
 <span class="sd">        &gt;&gt;&gt; model</span>
 <span class="sd">        TopicModel(n_topics=10, model=NMF)</span>
 
-<span class="sd">    Transform the corpus and interpret our model::</span>
+<span class="sd">    Transform the corpus and interpret our model:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; doc_topic_matrix = model.transform(doc_term_matrix)</span>
 <span class="sd">        &gt;&gt;&gt; for topic_idx, top_terms in model.top_topic_terms(vectorizer.id_to_term, topics=[0,1]):</span>
-<span class="sd">        ...     print(&#39;topic&#39;, topic_idx, &#39;:&#39;, &#39;   &#39;.join(top_terms))</span>
+<span class="sd">        ...     print(&quot;topic&quot;, topic_idx, &quot;:&quot;, &quot;   &quot;.join(top_terms))</span>
 <span class="sd">        topic 0 : people   american   go   year   work   think   $   today   money   america</span>
 <span class="sd">        topic 1 : rescind   quorum   order   unanimous   consent   ask   president   mr.   madam   absence</span>
 <span class="sd">        &gt;&gt;&gt; for topic_idx, top_docs in model.top_topic_docs(doc_topic_matrix, topics=[0,1], top_n=2):</span>
 <span class="sd">        ...     print(topic_idx)</span>
 <span class="sd">        ...     for j in top_docs:</span>
-<span class="sd">        ...         print(corpus[j].metadata[&#39;title&#39;])</span>
+<span class="sd">        ...         print(corpus[j]._.meta[&quot;title&quot;])</span>
 <span class="sd">        0</span>
 <span class="sd">        THE MOST IMPORTANT ISSUES FACING THE AMERICAN PEOPLE</span>
 <span class="sd">        55TH ANNIVERSARY OF THE BATTLE OF CRETE</span>
@@ -91,7 +97,7 @@
 <span class="sd">        CHEMICAL WEAPONS CONVENTION</span>
 <span class="sd">        MFN STATUS FOR CHINA</span>
 <span class="sd">        &gt;&gt;&gt; for doc_idx, topics in model.top_doc_topics(doc_topic_matrix, docs=range(5), top_n=2):</span>
-<span class="sd">        ...     print(corpus[doc_idx].metadata[&#39;title&#39;], &#39;:&#39;, topics)</span>
+<span class="sd">        ...     print(corpus[doc_idx]._.meta[&quot;title&quot;], &quot;:&quot;, topics)</span>
 <span class="sd">        JOIN THE SENATE AND PASS A CONTINUING RESOLUTION : (9, 0)</span>
 <span class="sd">        MEETING THE CHALLENGE : (2, 0)</span>
 <span class="sd">        DISPOSING OF SENATE AMENDMENT TO H.R. 1643, EXTENSION OF MOST-FAVORED- NATION TREATMENT FOR BULGARIA : (0, 9)</span>
@@ -110,30 +116,34 @@
 <span class="sd">        8 0.0680659204364</span>
 <span class="sd">        9 0.0725001620636</span>
 
-<span class="sd">    Visualize the model::</span>
+<span class="sd">    Visualize the model:</span>
+
+<span class="sd">    .. code-block:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; model.termite_plot(doc_term_matrix, vectorizer.id_to_term,</span>
-<span class="sd">        ...                    topics=-1,  n_terms=25, sort_terms_by=&#39;seriation&#39;)</span>
+<span class="sd">        ...                    topics=-1,  n_terms=25, sort_terms_by=&quot;seriation&quot;)</span>
 
-<span class="sd">    Persist our topic model to disk::</span>
+<span class="sd">    Persist our topic model to disk:</span>
 
-<span class="sd">        &gt;&gt;&gt; model.save(&#39;nmf-10topics.pkl&#39;)</span>
+<span class="sd">    .. code-block:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; model.save(&quot;nmf-10topics.pkl&quot;)</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        model ({&#39;nmf&#39;, &#39;lda&#39;, &#39;lsa&#39;} or ``sklearn.decomposition.&lt;model&gt;``)</span>
+<span class="sd">        model ({&quot;nmf&quot;, &quot;lda&quot;, &quot;lsa&quot;} or ``sklearn.decomposition.&lt;model&gt;``)</span>
 <span class="sd">        n_topics (int): number of topics in the model to be initialized</span>
 <span class="sd">        **kwargs:</span>
 <span class="sd">            variety of parameters used to initialize the model; see individual</span>
 <span class="sd">            sklearn pages for full details</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: if ``model`` not in ``{&#39;nmf&#39;, &#39;lda&#39;, &#39;lsa&#39;}`` or is not an</span>
+<span class="sd">        ValueError: if ``model`` not in ``{&quot;nmf&quot;, &quot;lda&quot;, &quot;lsa&quot;}`` or is not an</span>
 <span class="sd">            NMF, LatentDirichletAllocation, or TruncatedSVD instance</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        - http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html</span>
-<span class="sd">        - http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html</span>
-<span class="sd">        - http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html</span>
+<span class="sd">        * http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html</span>
+<span class="sd">        * http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html</span>
+<span class="sd">        * http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -207,7 +217,7 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">n_components</span>
 
-<div class="viewcode-block" id="TopicModel.get_doc_topic_matrix"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.get_doc_topic_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_doc_topic_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="TopicModel.get_doc_topic_matrix"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel.get_doc_topic_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_doc_topic_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_term_matrix</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform a document-term matrix into a document-topic matrix, where rows</span>
 <span class="sd">        correspond to documents and columns to the topics in the topic model.</span>
@@ -228,7 +238,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">doc_topic_matrix</span></div>
 
-<div class="viewcode-block" id="TopicModel.top_topic_terms"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.top_topic_terms">[docs]</a>    <span class="k">def</span> <span class="nf">top_topic_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id2term</span><span class="p">,</span> <span class="n">topics</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TopicModel.top_topic_terms"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel.top_topic_terms">[docs]</a>    <span class="k">def</span> <span class="nf">top_topic_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id2term</span><span class="p">,</span> <span class="n">topics</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the top ``top_n`` terms by weight per topic in ``model``.</span>
 
@@ -278,7 +288,7 @@
                     <span class="p">),</span>
                 <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TopicModel.top_topic_docs"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.top_topic_docs">[docs]</a>    <span class="k">def</span> <span class="nf">top_topic_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">,</span> <span class="n">topics</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TopicModel.top_topic_docs"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel.top_topic_docs">[docs]</a>    <span class="k">def</span> <span class="nf">top_topic_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">,</span> <span class="n">topics</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the top ``top_n`` docs by weight per topic in ``doc_topic_matrix``.</span>
 
@@ -322,7 +332,7 @@
                     <span class="p">),</span>
                 <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TopicModel.top_doc_topics"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.top_doc_topics">[docs]</a>    <span class="k">def</span> <span class="nf">top_doc_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">,</span> <span class="n">docs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TopicModel.top_doc_topics"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel.top_doc_topics">[docs]</a>    <span class="k">def</span> <span class="nf">top_doc_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">,</span> <span class="n">docs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the top ``top_n`` topics by weight per doc for ``docs`` in ``doc_topic_matrix``.</span>
 
@@ -366,7 +376,7 @@
                     <span class="p">),</span>
                 <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TopicModel.topic_weights"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.topic_weights">[docs]</a>    <span class="k">def</span> <span class="nf">topic_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="TopicModel.topic_weights"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel.topic_weights">[docs]</a>    <span class="k">def</span> <span class="nf">topic_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_topic_matrix</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the overall weight of topics across an entire corpus. Note: Values depend</span>
 <span class="sd">        on whether topic weights per document in ``doc_topic_matrix`` were normalized,</span>
@@ -387,7 +397,7 @@
     <span class="c1"># def get_model_coherence(self):</span>
     <span class="c1">#     raise NotImplementedError()</span>
 
-<div class="viewcode-block" id="TopicModel.termite_plot"><a class="viewcode-back" href="../../../api_reference.html#textacy.tm.topic_model.TopicModel.termite_plot">[docs]</a>    <span class="k">def</span> <span class="nf">termite_plot</span><span class="p">(</span>
+<div class="viewcode-block" id="TopicModel.termite_plot"><a class="viewcode-back" href="../../../api_reference/vsm_and_tm.html#textacy.tm.topic_model.TopicModel.termite_plot">[docs]</a>    <span class="k">def</span> <span class="nf">termite_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">doc_term_matrix</span><span class="p">,</span>
         <span class="n">id2term</span><span class="p">,</span>
@@ -591,8 +601,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -606,10 +616,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -623,7 +633,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

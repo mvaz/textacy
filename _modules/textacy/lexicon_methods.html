@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>textacy.lexicon_methods &#8212; textacy 0.7.0 documentation</title>
+    <title>textacy.lexicon_methods &#8212; textacy 0.7.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -59,14 +59,14 @@
 <span class="c1"># TODO: Do something smarter for averaging emotional valences?</span>
 
 
-<div class="viewcode-block" id="emotional_valence"><a class="viewcode-back" href="../../api_reference.html#textacy.lexicon_methods.emotional_valence">[docs]</a><span class="k">def</span> <span class="nf">emotional_valence</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dm_data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dm_weighting</span><span class="o">=</span><span class="s2">&quot;normfreq&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="emotional_valence"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.lexicon_methods.emotional_valence">[docs]</a><span class="k">def</span> <span class="nf">emotional_valence</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dm_data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dm_weighting</span><span class="o">=</span><span class="s2">&quot;normfreq&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get average emotional valence over all words for the following emotions --</span>
 <span class="sd">    AFRAID, AMUSED, ANGRY, ANNOYED, DONT_CARE, HAPPY, INSPIRED, SAD -- using</span>
 <span class="sd">    the [DepecheMood]_ dataset.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        words (List[``spacy.Token``]): list of words for which to get</span>
+<span class="sd">        words (List[:class:`spacy.tokens.Token`]): list of words for which to get</span>
 <span class="sd">            average emotional valence; note that only nouns, adjectives, adverbs,</span>
 <span class="sd">            and verbs will be counted</span>
 <span class="sd">        threshold (float): minimum emotional valence score for which to</span>
@@ -108,7 +108,7 @@
     <span class="k">return</span> <span class="n">emo_scores</span></div>
 
 
-<div class="viewcode-block" id="download_depechemood"><a class="viewcode-back" href="../../api_reference.html#textacy.lexicon_methods.download_depechemood">[docs]</a><span class="k">def</span> <span class="nf">download_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="download_depechemood"><a class="viewcode-back" href="../../api_reference/misc.html#textacy.lexicon_methods.download_depechemood">[docs]</a><span class="k">def</span> <span class="nf">download_depechemood</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download the DepecheMood dataset from GitHub, save to disk as .txt files.</span>
 
@@ -180,8 +180,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference/root.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">Changes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -195,10 +195,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -212,7 +212,7 @@
       &copy;2019 Chartbeat, Inc.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
